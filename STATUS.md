@@ -1,8 +1,9 @@
 # Status — 2026-08-17
 
-**Steps 1–2 of 6 done: type system, and the scroll rig ported and verified.**
-The mechanism works end to end on a test surface. None of the *piece* exists
-yet — `/` is still a stub; no real sectors, images, effect layer, boot or audio.
+**Steps 1–3 of 6 in progress: type system and scroll rig done; the read head
+works on real content.** `/` is now the piece: sectors 00–01 realised, imagery
+through `astro:assets`, and the WebGL effect layer drawing over them. Sectors
+02–11, `ScreenFX` and the four chrome components are the remainder of step 3.
 
 ## Done
 
@@ -65,9 +66,21 @@ yet — `/` is still a stub; no real sectors, images, effect layer, boot or audi
   rAF does not run in the agent tab; only injected static states were measured.
 - Reduced-motion and the horizontal-wheel gesture are ported but unexercised.
 
+### Step 3 (partial) — the read head on real content
+
+- `src/lib/effect-layer.ts` — the WebGL port. Two-pass: sharp planes into an
+  offscreen buffer, then the spherical lens + Bayer dither through the edge
+  mask. **The second fetch per picture is deleted** (A11).
+- `src/lib/ascii-mark.ts`, `src/lib/scramble.ts` — the canvas wordmark and the
+  decoding headings.
+- `src/styles/sector.css`, `src/components/Plate.astro` (A10),
+  `src/sectors/Sector00.astro` (title card + colophon),
+  `src/sectors/Sector01.astro` (first two plates).
+- All 17 NASA plates imported as repo assets; AVIF via `astro:assets`
+  (pcb 283kB → 28kB, rover 503kB → 72kB).
+
 ## Next
 
-Step 3 — **sector 00, fully realised**: real markup and copy, images through
-`astro:assets`, `EffectLayer` (the WebGL port — the hairiest piece), `ScreenFX`,
-and the chrome visible there (readout, rail, log, memory card, ASCII mark). This
-proves the whole system once before the remaining eleven sectors.
+Finish step 3: sectors 02–11, then `ScreenFX` (the CRT tube) and the four chrome
+components — `SectorReadout`, `ProgressRail`, `RecoveryLog`, `MemoryCard`. Then
+step 4 (boot + audio) and step 5 (perf/a11y/deploy).

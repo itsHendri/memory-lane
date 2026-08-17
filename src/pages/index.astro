@@ -1,35 +1,97 @@
 ---
 import Base from "~/layouts/Base.astro"
+import Sector00 from "~/sectors/Sector00.astro"
+import Sector01 from "~/sectors/Sector01.astro"
+import "~/styles/stage.css"
+import "~/styles/sector.css"
 
 /*
- * Placeholder. This becomes the piece itself once the rig lands (build step 2)
- * and sector 00 is realised (step 3). Deliberately left as a stub rather than
- * scaffolded with structure we have not yet proven.
+ * The piece.
+ *
+ * NOTHING MAY COME AFTER THE TRACK — no footer, no colophon section, nothing.
+ * A section below it keeps scrolling once the read is done and takes the pinned
+ * stage, memory card included, off the top of the screen. The colophon lives on
+ * sector 00 for exactly this reason. (Upstream #36.)
+ *
+ * Build state: sectors 00–01 realised; 02–11 still to come. `--tc-sectors`
+ * drives the track's height, so it must match the number of sectors below.
  */
+
+const SECTORS = 2
 ---
 
 <Base>
-    <main class="stub">
-        <p class="t-eyebrow">Sector 00 · media mounted</p>
-        <h1 class="t-display">Memory loaded</h1>
-        <p class="t-body">
-            Rebuild in progress. The type system is live — see <a href="/specimen"
-                >/specimen</a
-            >.
-        </p>
-    </main>
+    <div class="tc-track" id="tc-track" style={`--tc-sectors:${SECTORS}`}>
+        <div class="tc-stage" id="tc-stage">
+            <div class="tc-strip" id="tc-strip">
+                <Sector00 />
+                <Sector01 />
+            </div>
+
+            {/*
+              The read head. Sits over the strip but under the machine chrome,
+              and never takes pointer events — hover is resolved by the rig
+              against the DOM plates underneath.
+            */}
+            <canvas
+                class="tc-effect"
+                id="tc-effect"
+                aria-hidden="true"></canvas>
+        </div>
+    </div>
 </Base>
 
-<style>
-    .stub {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 14px;
-        padding: 0 40px;
+<script>
+    import { initScrollRig } from "~/lib/scroll-rig"
+    import { initEffectLayer } from "~/lib/effect-layer"
+    import { initAsciiMark } from "~/lib/ascii-mark"
+    import { initScramble } from "~/lib/scramble"
+
+    initScrollRig()
+
+    const canvas = document.getElementById("tc-effect") as HTMLCanvasElement
+    if (canvas) {
+        initEffectLayer({
+            canvas,
+            // Read from the live tokens rather than hardcoded, so the treatment
+            // stays with the page's derived ink as the ramp moves.
+            ink: getComputedStyle(document.documentElement)
+                .getPropertyValue("--tc-fg")
+                .trim() || "#FFFFFF",
+            paper: getComputedStyle(document.documentElement)
+                .getPropertyValue("--tc-bg")
+                .trim() || "#05060F",
+        })
     }
-    a {
-        color: var(--tc-fg);
+
+    const host = document.getElementById("tc-asciimark")
+    const markCanvas = document.getElementById(
+        "tc-asciimark-canvas"
+    ) as HTMLCanvasElement | null
+    if (host && markCanvas)
+        initAsciiMark({ host, canvas: markCanvas, text: "SECTOR READ" })
+
+    initScramble()
+</script>
+
+<style>
+    .tc-effect {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* No WebGL treatment on the vertical read: a 390px viewport leaves no
+     * meaningful clean band between two treated edges, and a multi-thousand
+     * pixel strip of textures is the main performance risk on a phone GPU.
+     * (Upstream #9.) */
+    @media (max-width: 810px) {
+        .tc-effect {
+            display: none;
+        }
     }
 </style>

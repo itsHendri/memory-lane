@@ -190,3 +190,66 @@ The stage now declares `background: var(--tc-bg)` in `stage.css` and the
 imperative write is deleted — one less style mutation per frame, and the colour
 system has a single writer. Verified: the stage's computed background tracks the
 ramp across the full sweep.
+
+---
+
+### A10. Sectors are markup; `Plate` is the only shared component
+
+**2026-08-17.** A2 keeps content in the sector files. In practice one component
+still earns its place: `src/components/Plate.astro`, which holds the `<img>`,
+the corner registration ticks and the slug's three fixed fields.
+
+The line is CONTENT versus CHROME. Which picture, where it sits, what the
+machine observed about it, and whether it is corrupt all stay in the sector
+file — moving a plate is still editing one number in `Sector01.astro`. What the
+component owns is the markup that is identical for all 24 plates and that nobody
+would ever want to vary. Upstream's rejected abstraction was a *sector* wrapper
+that put a schema between Hendri and the layout; this is not that.
+
+`file` is the SOURCE key rather than the plate id, so a duplicate in sectors
+08–11 reports the same file record as its original — otherwise "both frames
+match earlier records, bit for bit" is a claim the readout contradicts.
+(Upstream #39.)
+
+---
+
+### A11. The plane's texture is the page's own `<img>` — the second fetch is gone
+
+**2026-08-17.** Upstream's `EffectLayer` always loaded its own copy of every
+picture with `crossOrigin="anonymous"`, because sampling the page's `<img>`
+taints the WebGL context whenever that element was fetched without a
+crossorigin attribute — and Framer's tags do not set one. The cost was that
+**every picture on the strip was downloaded twice**.
+
+Our plates are same-origin repo assets, so the element itself is a legal texture
+source. `load()` is deleted; `upload()` reads `p.el` directly. Across the full
+strip that is 16 duplicate downloads removed, on top of AVIF.
+
+The try/catch stays. If the imagery ever moves to a cross-origin host without
+CORS headers, `texImage2D` throws, the plane is marked tainted, and the DOM
+picture is left visible rather than lost — the same failure behaviour as before,
+just reached differently.
+
+Verified end to end at 1280×900: both plates upload, their DOM twins go to
+`opacity: 0`, and the canvas draws 17% coverage with the treatment gradient
+crossing them.
+
+---
+
+### A12. Orientation is verified by luminance profile, not by looking
+
+**2026-08-17.** Upstream #25 (every picture rendered upside down) survived
+several review passes because the test imagery was near-symmetric, and it was
+Hendri who eventually caught it by eye. A port is exactly where that bug comes
+back, so it gets a test rather than a glance.
+
+The check compares the vertical luminance gradient of the rendered plate against
+the same gradient measured on the source `<img>` drawn upright into a 2D canvas.
+Measured on `rover`: rendered 146.9 / 141.0 / 122.5 top→middle→bottom, source
+147.9 / 139.5 / 115.3. Same direction, and close in absolute value.
+
+Two ways this test lies, both hit while writing it: fractional band offsets make
+the pixel index non-integer so every lookup returns `undefined` and the mean is
+a silent `NaN`; and `readPixels` is BOTTOM-UP, so the screen row must be
+converted (`gl_row = height - 1 - css_row`) or the test proves the opposite of
+what it claims.
