@@ -1,54 +1,73 @@
 # Status — 2026-08-17
 
-**Step 1 of 6 done: repo + type system, verified.** Nothing of the piece itself
-is built yet — `/` is a stub. The rig, the sectors, the effect layer, the boot
-and the audio are all still upstream-only.
+**Steps 1–2 of 6 done: type system, and the scroll rig ported and verified.**
+The mechanism works end to end on a test surface. None of the *piece* exists
+yet — `/` is still a stub; no real sectors, images, effect layer, boot or audio.
 
 ## Done
 
-- **Repo** at `~/memory-lane`, own git repo, Astro 5.18.2 + TypeScript strict,
-  static output. `astro check`: **0 errors**. Dev server on **5250**
-  (`.claude/launch.json` at `~/.claude/launch.json`, since the harness resolves
-  it from the working directory root).
-- **Tokens** (`src/styles/tokens.css`) — authored primitives + the `--tc-*`
-  derived layer the rig will drive, with fallbacks equal to the ramp at progress
-  0 so the page is legible before any JS runs (DECISIONS A3).
-- **Type** (`src/styles/type.css`) — Archivo 700 static + JetBrains Mono
-  variable, self-hosted, 48KB total, Inter dropped. Five presets: display,
-  eyebrow, label, body, value (+ inverted). Tracking unified to `-0.045em`
-  (A5).
-- **Metadata** — real title, description, canonical, OG/Twitter, theme-color.
-  The Framer original still ships `My Framer Site` / `Made with Framer`.
-- **Specimen** at `/specimen` — a permanent dev surface that proves the fonts
-  load, the weight axis varies, and every preset binds to the derived tokens.
+### Step 1 — repo + type system
+
+- Astro 5.18.2, TypeScript strict, static output, own git repo. `astro check`:
+  **0 errors**. Dev server on **5250** (config in `~/.claude/launch.json`, since
+  the harness resolves launch.json from the working-directory root).
+- Tokens split into authored primitives and the `--tc-*` derived layer, with
+  fallbacks equal to the ramp at progress 0 so the page is legible before and
+  without JS (A3).
+- Archivo 700 static + JetBrains Mono variable, self-hosted, **48KB total**,
+  Inter dropped (A4, A6). Five presets; tracking unified to `-0.045em` (A5).
+- Real document metadata for the first time.
+- `/specimen` — permanent type dev surface.
+
+### Step 2 — the scroll rig
+
+- `src/lib/contrast.ts` — DOM-free luminance / contrast / `pickDim` / ramp
+  sampling, extracted so it can be swept in Node (A7).
+- `src/lib/scroll-rig.ts` — the ported engine. Framework-free, ~2.7KB gz
+  compiled. Framer's three imports and all `--token-<uuid>` writes are gone;
+  the `tc:scroll` / `tc:hover` bus contract is preserved exactly, and typed.
+- `src/styles/stage.css` — track / stage / strip / sector layout, including the
+  vertical fallback below 810.
+- `/rig` — permanent test surface: 12 numbered blocks, a live HUD reading the
+  bus, and hoverable plates.
+- `scripts/sweep-contrast.ts` — the 400-sample sweep.
 
 ## Verified (measured, not eyeballed)
 
 | Check | Result |
 |---|---|
-| Both faces load (not a system fallback) | `Archivo 700 loaded`, `JetBrains Mono 400 700 loaded` |
-| Mono variable `wght` axis varies | ink 11,995 → 13,809 → 15,497 at 400/500/700 (+29.2%) |
-| Archivo is a single instance | identical ink at 400 and 700 — correct for a static file |
-| Display tracking matches original | computed −5.94px at 132px vs original −5.9px |
-| Derived fg/dim contrast at all 6 ramp stops | min **8.91:1** fg, min **4.72:1** dim; fg flips to black on ember |
+| Both faces load; mono `wght` axis varies | ink 11,995 → 13,809 → 15,497 at 400/500/700 |
+| Display tracking vs original | −5.94px at 132px vs original −5.9px |
+| Layout geometry | track 10800 = 12×900 · strip 16800 = 12×1400 · travel 15520 |
+| Pan accuracy at p 0/.25/.5/.719/.9/1 | exact to <0.5px at every point |
+| Sector under the read head | p0 → sector 00 … p1 → sector 11, monotonic |
+| Bus publishes | `tc:scroll` fires per injection; all six `--tc-*` vars update |
+| Stage colour tracks the ramp | computed background follows across the sweep |
+| **Contrast, 400 samples between stops** | **min 4.60:1 fg, 4.60:1 dim** (worst at p 0.719) |
+| Flip threshold proof, all luminances | pure #000/#fff 4.58:1 · palette near-black 4.41:1 |
+| Live DOM contrast, 101 samples | min 4.63:1 fg, 4.63:1 dim |
+| Hover tilt | corner axes mirror exactly, centre 0°, 2.9px counter-drift |
+| Hover state machine | zIndex 5, parent perspective 900px, metadata carried, clears |
+| Mobile fallback at 375×812 | stage static, strip column, no transform, chrome still publishes |
 
-⚠️ Those six figures are the ramp's **stops**. Upstream's tighter numbers
-(4.62 fg / 4.61 dim) come from 400 samples *between* stops, which is where the
-worst case lives. That sweep belongs to step 2, once the rig interpolates.
+## Fixed during the port
+
+- **`__tcPan` did nothing on mobile** (inherited from upstream) — it set
+  `pinned` and left publishing to rAF, which is exactly what does not run in the
+  tab the hook exists for. Now publishes synchronously. (A8.)
 
 ## Not verified
 
-- **Nothing has been judged visually.** The agent browser tab returns blank or
-  stale captures for scrolled content, so only the top of the specimen was seen
-  rendered. Type colour, weight and rhythm are Hendri's ⌘P check on 5250.
+- **The hover velocity gate.** `__tcPan` injects velocity 0 by design, so the
+  injection path cannot exercise it. Ported unchanged from a shipped build;
+  Hendri's ⌘P check.
+- **Motion feel** — lerp glide, hover timing, the tint transit in real scroll.
+  rAF does not run in the agent tab; only injected static states were measured.
+- Reduced-motion and the horizontal-wheel gesture are ported but unexercised.
 
 ## Next
 
-Step 2 — port `StripPan` as a standalone `scroll-rig` module: progress, lerp,
-`tc:scroll` bus, tint ramp, luminance-derived contrast, vertical fallback below
-810, reduced motion. Proof: numbered blocks panning + a 400-sample contrast
-sweep matching upstream #33.
-
-Then step 3 — sector 00 fully realised (markup, images, EffectLayer, ScreenFX
-and the chrome visible there), which proves the whole system once before the
-remaining eleven.
+Step 3 — **sector 00, fully realised**: real markup and copy, images through
+`astro:assets`, `EffectLayer` (the WebGL port — the hairiest piece), `ScreenFX`,
+and the chrome visible there (readout, rail, log, memory card, ASCII mark). This
+proves the whole system once before the remaining eleven sectors.

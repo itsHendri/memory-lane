@@ -5,6 +5,62 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Added — 2026-08-17 — scroll rig (build step 2/6)
+
+- `src/lib/contrast.ts` — DOM-free luminance, contrast ratio, `pickDim`, ramp
+  sampling and the tint derivation. Extracted from the rig so the colour system
+  can be swept and measured in Node rather than only by loading a page. (A7.)
+- `src/lib/scroll-rig.ts` — `StripPan` ported to a framework-free module.
+  React and Framer's three imports removed; all `--token-<uuid>` writes replaced
+  by semantic `--tc-*` properties; the `tc:scroll` / `tc:hover` bus contract
+  preserved exactly and now typed via `WindowEventMap`. Compiles to **2.7KB gz**.
+- `src/styles/stage.css` — track / stage / strip / sector layout and the
+  vertical fallback below 810.
+- `src/pages/rig.astro` — permanent rig test surface: 12 numbered blocks, a HUD
+  subscribed to the bus, hoverable plates.
+- `scripts/sweep-contrast.ts` — 400-sample contrast sweep across the
+  interpolated ramp, plus an independent proof of the flip threshold.
+
+### Fixed
+
+- **`__tcPan` published nothing below the mobile cutoff** — a defect inherited
+  from upstream. It set `pinned` and left publishing to the mobile rAF loop,
+  which is precisely what does not run in the backgrounded tab the hook exists
+  to work around, so the phone chrome was never actually verifiable despite a
+  comment claiming it was. Now publishes synchronously. (A8.)
+
+### Changed
+
+- The stage's background comes from `background: var(--tc-bg)` in CSS instead of
+  an imperative per-frame `style.backgroundColor` write. Upstream needed the
+  write because Framer authored the fill on the node; here the variable is the
+  mechanism. One fewer style mutation per frame, one writer. (A9.)
+- `pickDim` walks integer steps (0.10…0.80) rather than accumulating `+= 0.05`
+  in floating point, which drifts and can drop the final step.
+
+### Verified
+
+- Pan accuracy exact to <0.5px at p 0 / .25 / .5 / .719 / .9 / 1 against a
+  measured travel of 15,520px; sector under the read head monotonic 00 → 11.
+- **Contrast across 400 samples between stops: min 4.60:1 foreground, 4.60:1
+  dim**, worst case at p 0.719 inside the ember transit, two foreground flips —
+  matching upstream's 4.62 / 4.61 to within 0.02.
+- Flip threshold proven independently of the ramp: pure black/white worst case
+  4.58:1 across all luminances, the palette's near-black 4.41:1 — which is why
+  the derived dark tone is pure `#000`.
+- Live DOM contrast over 101 samples: 4.63:1 both.
+- Hover tilt symmetric (corner axes mirror, centre 0°, 2.9px counter-drift);
+  state machine sets zIndex and parent perspective, carries metadata, and clears.
+- Mobile at 375×812: stage static, strip column, no transform, chrome still
+  publishing.
+
+### Not verified
+
+- The hover velocity gate — `__tcPan` injects velocity 0 by design, so the
+  injection path cannot exercise it.
+- Motion feel (lerp glide, hover timing, tint transit under real scroll): rAF
+  does not run in the agent tab, so only injected static states were measured.
+
 ### Added — 2026-08-17 — repo + type system (build step 1/6)
 
 - Astro 5.18.2 project, TypeScript strict, static output, own git repo. Dev

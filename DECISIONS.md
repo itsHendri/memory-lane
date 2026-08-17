@@ -134,3 +134,59 @@ Precise glyph subsetting is deliberately deferred rather than skipped, and is
 effect resolves headings out of noise, so the used-glyph set is wider than the
 visible copy suggests. Any subsetting pass must include the scramble alphabet
 and the `" .:-=+*#%@"` ASCII ramp. Logged in `FUTURE.md`.
+
+---
+
+### A7. The colour maths is a separate, DOM-free module
+
+**2026-08-17.** Upstream's luminance / contrast / `pickDim` / ramp code lived
+inside the rig's `useEffect`, where it could only ever be exercised by loading a
+page. It is now `src/lib/contrast.ts` — pure functions, no DOM — which is what
+makes `scripts/sweep-contrast.ts` possible.
+
+That sweep is the point. The ramp's **stops** are easy: they were chosen. The
+failures live *between* stops, at colours nobody designed for, which is exactly
+where upstream #33 found type at ~2.6:1. Checking the six authored colours would
+have passed while the real problem sat at p 0.719.
+
+Measured, 400 samples across the interpolated ramp: **min 4.60:1 foreground,
+4.60:1 dim**, worst case at p 0.719 (inside the ember transit), two foreground
+flips. Upstream reported 4.62 / 4.61 — the 0.02 difference is `pickDim`'s
+integer stepping versus upstream's accumulating float, and both clear AA.
+
+The script additionally proves the FLIP threshold independently of this ramp, by
+sweeping all luminances: pure black/white worst case **4.58:1**, the palette's
+near-black **4.41:1**. That is #33 demonstrated rather than trusted, and it will
+keep being true if the ramp is ever re-authored.
+
+---
+
+### A8. `__tcPan` publishes synchronously on mobile too
+
+**2026-08-17.** A real defect inherited from upstream, found by testing the
+phone layout rather than assuming it.
+
+Upstream's injection hook, below the mobile cutoff, set `pinned` and returned —
+leaving the publishing to the mobile rAF loop, with the comment *"the mobile
+publisher reads it, so the phone layout's chrome is verifiable the same way as
+the desktop's."* It is not: rAF is precisely what does **not** run in the
+backgrounded tab the hook exists to work around. Injecting progress on a narrow
+viewport updated nothing — no CSS variables, no `tc:scroll` — so the phone
+chrome could never actually be verified.
+
+It now publishes synchronously in the same call. Verified at 375×812: injecting
+p updates `--tc-p` / `--tc-bg` / `--tc-fg` and fires the bus, while correctly
+writing no transform.
+
+---
+
+### A9. The stage takes its colour from CSS, not from a per-frame write
+
+**2026-08-17.** Upstream wrote `stage.style.backgroundColor` imperatively every
+frame *in addition to* setting `--tc-bg`, because in Framer the stage's fill was
+authored on the node and a variable could never reach it.
+
+The stage now declares `background: var(--tc-bg)` in `stage.css` and the
+imperative write is deleted — one less style mutation per frame, and the colour
+system has a single writer. Verified: the stage's computed background tracks the
+ramp across the full sweep.
