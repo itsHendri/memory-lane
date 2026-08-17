@@ -87,61 +87,81 @@ const SECTORS = 12
     import { initRigAudio } from "~/lib/audio"
 
     const SECTORS_N = 12
+    const byId = (id: string) => document.getElementById(id)
 
+    /*
+     * Two tiers, and the split is a real performance decision.
+     *
+     * CRITICAL: the rig (scroll must work from the first frame), the audio
+     * (it has to be listening for `tc:begin` before the boot fires it — the
+     * graph itself is not built until then, so this is cheap), and the boot.
+     *
+     * DEFERRED: everything the boot is covering up. Compiling two WebGL
+     * programs, uploading textures, baking the faceplate and building the
+     * card are all pointless work to do on the critical path while a
+     * full-screen terminal is typing over the top of them. `requestIdleCallback`
+     * runs them in the gaps during the boot, so they are ready by handoff
+     * without ever blocking first paint.
+     *
+     * Measured cost of doing it the other way: one 734ms long task under
+     * Lighthouse's 4× CPU throttle, and a Total Blocking Time of 759ms.
+     */
     initScrollRig()
 
-    const canvas = document.getElementById("tc-effect") as HTMLCanvasElement
-    if (canvas) {
-        initEffectLayer({
-            canvas,
-            // Read from the live tokens rather than hardcoded, so the treatment
-            // stays with the page's derived ink as the ramp moves.
-            ink: getComputedStyle(document.documentElement)
-                .getPropertyValue("--tc-fg")
-                .trim() || "#FFFFFF",
-            paper: getComputedStyle(document.documentElement)
-                .getPropertyValue("--tc-bg")
-                .trim() || "#05060F",
-        })
-    }
-
-    const host = document.getElementById("tc-asciimark")
-    const markCanvas = document.getElementById(
-        "tc-asciimark-canvas"
-    ) as HTMLCanvasElement | null
-    if (host && markCanvas)
-        initAsciiMark({ host, canvas: markCanvas, text: "SECTOR READ" })
-
-    initScramble()
-
-    const rail = document.getElementById("tc-rail")
-    if (rail) initProgressRail({ root: rail, sectors: 12 })
-
-    const readout = document.getElementById("tc-readout")
-    if (readout) initSectorReadout(readout)
-
-    const log = document.getElementById("tc-log")
-    if (log) initRecoveryLog(log)
-
-    const bay = document.getElementById("tc-card")
-    if (bay) initMemoryCard({ host: bay })
-
-    const audioBtn = document.getElementById("tc-audio")
+    const audioBtn = byId("tc-audio")
     if (audioBtn) initRigAudio({ button: audioBtn, sectors: SECTORS_N })
 
-    // Last: it locks scroll and hands off with `tc:begin`, which arms the audio
-    // graph — so everything it hands off to has to exist first.
-    const bootHost = document.getElementById("tc-boot")
-    const bootList = document.getElementById("tc-boot-list")
-    const bootCaret = document.getElementById("tc-boot-caret")
+    const bootHost = byId("tc-boot")
+    const bootList = byId("tc-boot-list")
+    const bootCaret = byId("tc-boot-caret")
     if (bootHost && bootList && bootCaret)
         initBoot({ host: bootHost, list: bootList, caret: bootCaret })
 
-    initScreenFX({
-        trail: document.getElementById("tc-fx-trail") as HTMLCanvasElement,
-        noise: document.getElementById("tc-fx-static") as HTMLCanvasElement,
-        edge: document.getElementById("tc-fx-edge") as HTMLCanvasElement,
-    })
+    const idle =
+        window.requestIdleCallback ??
+        ((fn: IdleRequestCallback) => window.setTimeout(() => fn({} as IdleDeadline), 1))
+
+    idle(
+        () => {
+            const canvas = byId("tc-effect") as HTMLCanvasElement | null
+            if (canvas) {
+                const root = getComputedStyle(document.documentElement)
+                initEffectLayer({
+                    canvas,
+                    ink: root.getPropertyValue("--tc-fg").trim() || "#FFFFFF",
+                    paper: root.getPropertyValue("--tc-bg").trim() || "#05060F",
+                })
+            }
+
+            const host = byId("tc-asciimark")
+            const markCanvas = byId(
+                "tc-asciimark-canvas"
+            ) as HTMLCanvasElement | null
+            if (host && markCanvas)
+                initAsciiMark({ host, canvas: markCanvas, text: "SECTOR READ" })
+
+            initScramble()
+
+            const rail = byId("tc-rail")
+            if (rail) initProgressRail({ root: rail, sectors: SECTORS_N })
+
+            const readout = byId("tc-readout")
+            if (readout) initSectorReadout(readout)
+
+            const log = byId("tc-log")
+            if (log) initRecoveryLog(log)
+
+            const bay = byId("tc-card")
+            if (bay) initMemoryCard({ host: bay })
+
+            initScreenFX({
+                trail: byId("tc-fx-trail") as HTMLCanvasElement,
+                noise: byId("tc-fx-static") as HTMLCanvasElement,
+                edge: byId("tc-fx-edge") as HTMLCanvasElement,
+            })
+        },
+        { timeout: 1200 }
+    )
 </script>
 
 <style>

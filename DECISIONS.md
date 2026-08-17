@@ -421,3 +421,58 @@ is clamped in this tab.
 Sector 04's stutter engages on entry and stops on exit, and the mute toggle
 persists to localStorage, ramps master to 0, and dims to 0.62 rather than
 0.45 — a control must stay findable exactly when it is off (upstream #52).
+
+---
+
+### A20. The heavy layers initialise during the boot, not on the critical path
+
+**2026-08-17.** The first Lighthouse run scored **78** against Framer's 58 — a
+win on every paint metric and a bad loss on one: **Total Blocking Time 759ms
+against Framer's 41ms**, from a single 734ms long task.
+
+The cause was not any one expensive routine. Measured individually, the
+faceplate bake is 5ms, the static paint 1ms, the ASCII build 1.5ms and a full
+effect-layer render 2.9ms. It was *all of them together*, running synchronously
+at load under Lighthouse's 4× CPU throttle — with WebGL falling back to software
+rendering in headless Chrome, which makes shader compilation and texture upload
+far more expensive than they are on a real GPU.
+
+The fix is architectural rather than micro-optimisation, and it is the obvious
+thing in hindsight: **the boot sequence covers the entire screen for several
+seconds.** Compiling two WebGL programs, uploading textures, baking the
+faceplate and building the card while a full-screen terminal types over the top
+of them is pointless work on the critical path.
+
+Init now has two tiers. Critical: the rig (scroll must work from the first
+frame), the audio (it has to be listening for `tc:begin` before the boot fires
+it — the graph itself is not built until then), and the boot. Everything else
+runs in `requestIdleCallback` with a 1200ms timeout, so it fills the gaps while
+the boot types and is ready by handoff.
+
+| | before | after |
+|---|---|---|
+| Performance | 78 | **94** |
+| Total Blocking Time | 759 ms | **42 ms** |
+| Speed Index | 1318 ms | 1204 ms |
+
+LCP and TTI move slightly the wrong way (2706→3079ms, 2721→3132ms) because the
+deferred work now lands later. That is the correct trade: the work is off the
+path that blocks interaction, and TBT dominates the score.
+
+---
+
+### A21. `font-size` is a deliberate audit failure
+
+**2026-08-17.** Lighthouse reports "34% legible text" and best-practices sits at
+96 rather than 100 because of it. The offenders are the colophon (11px), the
+eyebrows and rail (10px), the log (9.5px) and the plate slugs (9px).
+
+This is not a defect to fix. Small tracked mono type IS the instrument — it is
+most of what makes the page read as a machine rather than a gallery (upstream
+#28), and every size here matches the original. Raising them to clear the audit
+would cost the aesthetic to gain four points on a category the piece already
+leads on elsewhere.
+
+Recorded so nobody "fixes" it later without knowing it was priced. The real
+accessibility measures — contrast at 4.6:1 minimum through the whole tint,
+keyboard navigation, landmarks, reduced-motion — score **100**.

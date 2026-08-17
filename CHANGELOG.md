@@ -5,6 +5,32 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Changed — 2026-08-17 — performance pass (build step 6/6)
+
+- **Init split into two tiers.** The rig, the audio listener and the boot run
+  immediately; the effect layer, tube, chrome, wordmark and scramble run in
+  `requestIdleCallback`. The boot covers the whole screen for several seconds,
+  so compiling two WebGL programs, uploading textures and baking the faceplate
+  on the critical path was work nobody could see. (A20.)
+- Added a favicon — the browser was requesting `/favicon.ico` and logging a 404.
+- Added `_headers` for Cloudflare Pages: immutable caching on content-hashed
+  assets and on fonts, plus `nosniff` and a referrer policy.
+- Added `npm run deploy`.
+
+### Measured
+
+| | before | after |
+|---|---|---|
+| Performance | 78 | **94** |
+| Total Blocking Time | 759 ms | **42 ms** |
+| Best practices | 93 | 96 |
+
+**Against the Framer original**: performance **94 vs 58**, accessibility
+**100 vs 95**, SEO level at 100, best practices 96 vs 100 (the `font-size` audit,
+a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
+3.9×, blocking time level.
+
+
 ### Added — 2026-08-17 — boot sequence and audio (build step 5/6)
 
 - `src/lib/boot.ts` + `src/components/BootSequence.astro` — beat zero: a typed

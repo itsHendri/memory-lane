@@ -1,6 +1,7 @@
 # Status — 2026-08-17
 
-**Steps 1–5 of 6 done. The piece is functionally complete.** Boot sequence,
+**Steps 1–6 done, except the deploy itself, which needs Hendri's Cloudflare
+login.** The piece is complete and measured. Boot sequence,
 twelve sectors, 24 plates on 17 distinct pictures, the WebGL read head, the CRT
 tube, the machine chrome and the synthesized audio. What remains is step 6: the
 Lighthouse comparison and the Cloudflare Pages deploy — plus the end-state
@@ -101,6 +102,30 @@ controls noted below.
   s04 dropouts and the set switching off at end of media. **Zero asset bytes**
   (A19). Labelled audio control bottom-right.
 
+### Step 6 — Lighthouse
+
+Measured with Lighthouse 12, headless Chrome, default mobile throttling.
+The rebuild was run against the production build served by `astro preview`;
+Framer against the live site.
+
+| | rebuild | Framer | |
+|---|---|---|---|
+| **Performance** | **94** | 58 | +36 |
+| **Accessibility** | **100** | 95 | +5 |
+| Best practices | 96 | 100 | −4 (A21) |
+| SEO | 100 | 100 | — |
+| First Contentful Paint | **1204 ms** | 6075 ms | 5.0× |
+| Largest Contentful Paint | **3079 ms** | 12013 ms | 3.9× |
+| Speed Index | **1204 ms** | 7188 ms | 6.0× |
+| Total Blocking Time | 42 ms | 41 ms | level |
+| Time to Interactive | **3132 ms** | 12519 ms | 4.0× |
+| Total bytes | 2233 KB | 2953 KB | |
+
+Caveat: localhost has no network RTT for the initial connection, so the paint
+numbers flatter the rebuild somewhat. Re-run against the deployed URL for the
+honest figure — the gap is large enough that the conclusion will not change,
+but the multiples will.
+
 ## Payload (full page, production build)
 
 | | gz |
@@ -124,7 +149,16 @@ belongs to step 6 — these are byte counts, not scores.
   ending. Small, and worth doing before launch — the visitor should be released,
   not abandoned.
 
-## Next
+## Next — Hendri's
 
-Step 6 — Lighthouse against the Framer original (record both numbers rather than
-asserting a win), an OG image, then Cloudflare Pages on the real domain.
+1. **Deploy.** Everything is ready; it needs a Cloudflare login, which is not
+   something Claude can or should do:
+   ```
+   npx wrangler login
+   npm run deploy
+   ```
+   Then re-run Lighthouse against the deployed URL and replace the table above.
+2. **Point the custom domain** at the Pages project.
+3. **An OG image.** There is none — an ember or void frame would do it.
+4. **⌘P everything.** Motion feel, the boot's pacing, the sound levels, the
+   read-head gradient. All measured, none judged.

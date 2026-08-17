@@ -41,6 +41,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
 
         <meta name="theme-color" content="#05060f" />
 
+        {/* Without this the browser requests /favicon.ico and logs a 404. */}
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
         {/*
           Both faces are used above the fold — the headline and every chrome
           readout — so both preload. `crossorigin` is required even same-origin
