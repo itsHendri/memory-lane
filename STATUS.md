@@ -1,9 +1,10 @@
 # Status — 2026-08-17
 
-**Steps 1–4 of 6 done.** `/` is the piece: twelve sectors, 24 plates on 17
-distinct pictures, the WebGL read head, the CRT tube and the full machine
-chrome. What remains is the boot sequence and the procedural audio, then the
-Lighthouse/deploy pass.
+**Steps 1–5 of 6 done. The piece is functionally complete.** Boot sequence,
+twelve sectors, 24 plates on 17 distinct pictures, the WebGL read head, the CRT
+tube, the machine chrome and the synthesized audio. What remains is step 6: the
+Lighthouse comparison and the Cloudflare Pages deploy — plus the end-state
+controls noted below.
 
 ## Done
 
@@ -91,13 +92,22 @@ Lighthouse/deploy pass.
 - The rail's twelve cells are real `<button>`s with `aria-label`s inside a
   `role="navigation"` landmark — the piece's only keyboard navigation.
 
+### Step 5 — boot and audio
+
+- `src/lib/boot.ts` + `src/components/BootSequence.astro` — the typed terminal,
+  which is also the real preloader (A18). Derives its own contrast from its
+  Signal field: 9.91:1 bright / 5.12:1 dim, matching upstream exactly (A17).
+- `src/lib/audio.ts` — television static, decode bloops, the hover click, the
+  s04 dropouts and the set switching off at end of media. **Zero asset bytes**
+  (A19). Labelled audio control bottom-right.
+
 ## Payload (full page, production build)
 
 | | gz |
 |---|---|
-| HTML | 5.1 KB |
-| CSS | 3.5 KB |
-| JS (rig, effect layer, tube, chrome, wordmark, scramble) | 15.8 KB |
+| HTML | 5.6 KB |
+| CSS | 3.7 KB |
+| JS (everything: rig, WebGL, tube, chrome, boot, audio) | 19.0 KB |
 | Fonts | 45.8 KB |
 | Images, first load @1× | 65 KB |
 
@@ -105,11 +115,16 @@ The Framer original ships **~295KB gz of JS alone**, plus JPG-only imagery with
 no lazy loading and seven unused Inter files. A real Lighthouse comparison still
 belongs to step 6 — these are byte counts, not scores.
 
+## Not ported
+
+- **`BayControls` — the `EJECT` / `RE-READ` end state.** Upstream #42 gives the
+  reader two in-fiction releases at 100%: EJECT retires the card, RE-READ is
+  scroll-to-top as a rewind. The rig already parks correctly (rail `eom`, card
+  spin-down, audio switching off), so what is missing is the affordance, not the
+  ending. Small, and worth doing before launch — the visitor should be released,
+  not abandoned.
+
 ## Next
 
-Step 5 — the boot sequence (a typed terminal that is also the real preloader,
-counting font and image readiness) and `RigAudio` (fully synthesized, zero asset
-bytes: television static swelling with head velocity, decode bloops, the s04
-stutter, and a set switching off at end of media).
-
-Then step 6 — Lighthouse against the Framer baseline, then Cloudflare Pages.
+Step 6 — Lighthouse against the Framer original (record both numbers rather than
+asserting a win), an OG image, then Cloudflare Pages on the real domain.

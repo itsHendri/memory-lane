@@ -341,3 +341,83 @@ two distinct files still differ. (Upstream #39.)
 
 Duplicate plates also carry their original's exact dimensions, so the slug's
 printed size cannot contradict the "bit for bit" claim either.
+
+---
+
+### A17. The boot derives its own contrast from its own field
+
+**2026-08-17.** The boot renders on Signal blue at z-index 9 — below the tube
+(10) and above all other chrome (6–7), so the vignette, scanlines, static and
+faceplate all land on it. Above the tube it is the one screen in the piece with
+no screen on it: a flat rectangle of type. (Upstream #50.)
+
+It must NOT use the page's `--tc-fg-dim`. That value is computed by the rig
+against the PAGE background, which at progress 0 is near-black, and a dim tone
+measured for near-black lands at about 2.3:1 on Signal blue. The boot runs the
+same derivation locally against its own field — reusing `contrast.ts`, which is
+the payoff for having extracted it in A7.
+
+Measured on the live boot: **9.91:1 bright, 5.12:1 dim** — identical to the
+figures upstream recorded, which is the strongest available evidence that the
+port's colour maths is the same maths.
+
+---
+
+### A18. The preloader is honest by construction
+
+**2026-08-17.** Every milestone the boot types is a real observable:
+`document.fonts.ready` for TYPEFACES, and an actual `img.decode()` per picture
+for MOUNTING. The watch list is discovered from the DOM (`[id^="tc-item-"]`),
+so it cannot drift from what the page actually holds — it reports **17/17**
+here because the rebuild has 17 distinct sources, without anyone updating a
+constant.
+
+A live row is not allowed to finish typing until its real value has arrived,
+which is what makes the tally a loading bar rather than a decoration. A 6s guard
+forces completion regardless: a stalled asset is a fault the rig works around,
+not a hostage situation.
+
+Typing runs on a rAF accumulator, never `setTimeout` — which is clamped to ≥1s
+in a backgrounded tab and would stretch the sequence to half a minute during
+verification.
+
+---
+
+### A19. Audio arms at handoff and unlocks on the first gesture
+
+**2026-08-17.** With no BEGIN READ button there is no click to build the graph
+inside, so `tc:begin` at boot handoff creates the context (suspended, which is
+legal and silent) and the visitor's first gesture resumes it. `scroll` is in the
+gesture list deliberately: on this page it is the first thing anyone does, and a
+wheel event does not always precede it (trackpad inertia, keyboard, a restored
+scroll position). (Upstream #45.)
+
+Verified end to end, reading the live graph rather than trusting the code:
+
+| Head velocity | Bed gain | Band |
+|---|---|---|
+| 0 (rest) | **0.00000** | 1400 Hz |
+| 2 | 0.00100 | 1640 Hz |
+| 5 (typical read) | 0.00250 | 2000 Hz |
+| 10 | 0.00500 | 2600 Hz |
+| 20+ (hard flick) | 0.01000 (ceiling) | 3800 Hz |
+
+Rest is genuinely silent, the rise is monotonic, a typical reading scroll sits
+at **25% of ceiling**, and the band brightens with speed. That is upstream #49's
+intent reproduced exactly.
+
+**The watchdog is the part that matters and the part that is easy to miss.**
+`tc:scroll` only fires while the strip is moving, so the last event before a
+stop carries a small non-zero velocity and nothing ever arrives to take the bed
+down — a quiet hiss runs for as long as the reader sits still. No ceiling change
+can fix that. Verified: driven to its 0.01 ceiling and then left alone, the bed
+falls to exactly **0**.
+
+Note a measurement trap: `linearRampToValueAtTime` SCHEDULES a ramp, so reading
+`gain.value` in the same tick always returns the pre-ramp value. The audio clock
+has to be allowed to advance — a busy-wait works, and beats `setTimeout`, which
+is clamped in this tab.
+
+Sector 04's stutter engages on entry and stops on exit, and the mute toggle
+persists to localStorage, ramps master to 0, and dims to 0.62 rather than
+0.45 — a control must stay findable exactly when it is off (upstream #52).

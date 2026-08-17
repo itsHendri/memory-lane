@@ -5,6 +5,45 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Added — 2026-08-17 — boot sequence and audio (build step 5/6)
+
+- `src/lib/boot.ts` + `src/components/BootSequence.astro` — beat zero: a typed
+  terminal that is also the **real preloader**. Every milestone is an actual
+  observable (`document.fonts.ready`, `img.decode()` per picture), the watch
+  list is discovered from the DOM so it cannot drift from the page's content,
+  and a live row will not finish typing until its real value arrives. A 6s guard
+  finishes regardless. Runs on a rAF accumulator, never `setTimeout` (A18).
+- `src/lib/audio.ts` — the rig's sound, synthesized end to end with **zero asset
+  bytes**: television static through a wide bandpass, a decode bloop per sector
+  boundary with random detune, a mechanical hover click, arrhythmic dropouts
+  through sector 04, and a set switching off at end of media (A19).
+- A labelled audio control bottom-right with `aria-pressed`, a slash glyph when
+  muted, and a preference persisted to localStorage.
+
+### Verified
+
+- Boot derives its own contrast from its Signal field: **9.91:1 bright, 5.12:1
+  dim** — identical to the figures upstream recorded on the live boot, which is
+  the strongest available evidence the port's colour maths is the same maths
+  (A17). All fourteen script lines match `story/beats.md` verbatim, including
+  the postmark and the last-write timestamp that stops mid-digit.
+- Mount tally reports **17/17**, discovered from the DOM rather than a constant.
+- Audio bed measured off the live graph: rest **0.00000**, monotonic rise to the
+  0.01 ceiling at v=20, typical reading scroll at **25% of ceiling**, band
+  brightening 1400→3800 Hz.
+- **Silence watchdog verified**: driven to its ceiling and then left alone, the
+  bed falls to exactly 0 — the fault no ceiling change could fix (upstream #49).
+- Sector 04's stutter engages on entry and stops on exit; mute ramps master to
+  0, persists, and dims to 0.62 rather than 0.45.
+- Full-page code payload: 19.0KB JS + 3.7KB CSS + 5.6KB HTML, all gzipped.
+
+### Not ported
+
+- `BayControls` — the `EJECT` / `RE-READ` end-state affordances (upstream #42).
+  The rig already parks correctly; what is missing is the release, not the
+  ending.
+
+
 ### Added — 2026-08-17 — the machine chrome (build step 4/6)
 
 - `src/lib/chrome.ts` + `src/components/MachineChrome.astro` — four bus

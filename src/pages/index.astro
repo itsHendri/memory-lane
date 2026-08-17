@@ -13,6 +13,7 @@ import Sector09 from "~/sectors/Sector09.astro"
 import Sector10 from "~/sectors/Sector10.astro"
 import Sector11 from "~/sectors/Sector11.astro"
 import MachineChrome from "~/components/MachineChrome.astro"
+import BootSequence from "~/components/BootSequence.astro"
 import ScreenFX from "~/components/ScreenFX.astro"
 import "~/styles/stage.css"
 import "~/styles/sector.css"
@@ -65,6 +66,8 @@ const SECTORS = 12
     {/* Chrome first, then the tube over it: the readout, rail, log and card are
         all inside the machine and take its vignette and scanlines. */}
     <MachineChrome sectors={SECTORS} />
+    {/* The boot sits under the tube and above all other chrome. */}
+    <BootSequence />
     <ScreenFX />
 </Base>
 
@@ -80,6 +83,10 @@ const SECTORS = 12
         initRecoveryLog,
         initMemoryCard,
     } from "~/lib/chrome"
+    import { initBoot } from "~/lib/boot"
+    import { initRigAudio } from "~/lib/audio"
+
+    const SECTORS_N = 12
 
     initScrollRig()
 
@@ -118,6 +125,17 @@ const SECTORS = 12
 
     const bay = document.getElementById("tc-card")
     if (bay) initMemoryCard({ host: bay })
+
+    const audioBtn = document.getElementById("tc-audio")
+    if (audioBtn) initRigAudio({ button: audioBtn, sectors: SECTORS_N })
+
+    // Last: it locks scroll and hands off with `tc:begin`, which arms the audio
+    // graph — so everything it hands off to has to exist first.
+    const bootHost = document.getElementById("tc-boot")
+    const bootList = document.getElementById("tc-boot-list")
+    const bootCaret = document.getElementById("tc-boot-caret")
+    if (bootHost && bootList && bootCaret)
+        initBoot({ host: bootHost, list: bootList, caret: bootCaret })
 
     initScreenFX({
         trail: document.getElementById("tc-fx-trail") as HTMLCanvasElement,
