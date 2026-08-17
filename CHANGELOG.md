@@ -5,6 +5,19 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Fixed — 2026-08-17 — the boot was blocking the read
+
+- **The boot force-downloaded every plate and locked scrolling while it did.**
+  It built its watch list from every plate's `src`, which is populated on lazy
+  images too, so it fetched all 17 sources — cancelling the lazy loading added
+  the same day — while holding `overflow: hidden` on the document. Until that
+  finished, the page could not be scrolled at all. Now watches only the eager
+  plates: images fetched on load **17 → 5**. (A22.)
+- Added a 9s failsafe that dismisses the boot unconditionally. The existing 6s
+  guard only forces the live rows complete; it cannot rescue a dead rAF loop,
+  and with scroll locked behind the boot that would brick the piece.
+
+
 ### Changed — 2026-08-17 — performance pass (build step 6/6)
 
 - **Init split into two tiers.** The rig, the audio listener and the boot run

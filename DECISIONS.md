@@ -476,3 +476,42 @@ leads on elsewhere.
 Recorded so nobody "fixes" it later without knowing it was priced. The real
 accessibility measures — contrast at 4.6:1 minimum through the whole tint,
 keyboard navigation, landmarks, reduced-motion — score **100**.
+
+---
+
+### A22. The boot was force-loading every plate, and holding scroll hostage
+
+**2026-08-17, found by Hendri loading the page.** Reported as "doesn't seem like
+we have a side scroll".
+
+The mechanism was never broken — sticky pins at every scroll position and
+progress runs cleanly 0 → 1. The fault was the boot, and it is a collision
+between two decisions taken in different steps:
+
+- **A13** made 19 of the 24 plates `loading="lazy"`, dropping first-load imagery
+  from 3.6MB to 65KB.
+- **A18** had the boot build its watch list from every `[id^="tc-item-"]` image's
+  `src` — and `src` is populated on a lazy image too. So the boot constructed a
+  `new Image()` for all 17 sources and downloaded the lot.
+
+Net effect: the lazy loading was silently cancelled, AND the boot holds
+`overflow: hidden` on the document until it hands off — so the page could not be
+scrolled at all until 3.6MB had arrived, or until the 6s guard fired. On a fast
+local connection that reads as a brief pause. On a real one it reads as a broken
+page, which is exactly what it looked like.
+
+The boot now watches only the EAGER plates. Measured: images fetched on load
+17 → **5**. Still honest — every counted decode is a real decode of an image the
+read genuinely needs before it can begin.
+
+**Why no test caught this.** Every verification so far drove the rig through
+`__tcPan`, which injects progress directly and bypasses real scroll entirely —
+and most runs used `?boot=0`, which skips the boot. The two things that were
+broken were the two things the harness was designed to step around. A hook that
+makes a page verifiable in a throttled tab will also hide anything that only
+fails on the real path.
+
+Also added: a 9s failsafe that dismisses the boot unconditionally. The 6s guard
+only forces the live rows complete; it does not rescue a dead rAF loop, and with
+scroll locked behind the boot a throw anywhere in the typing loop bricks the
+piece for that visitor with no way out but a reload.

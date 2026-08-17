@@ -102,12 +102,25 @@ export function initBoot(options: BootOptions): () => void {
     const prevOverflow = document.documentElement.style.overflow
     document.documentElement.style.overflow = "hidden"
 
-    /* Discover the strip's own pictures, so the mount tally counts the real
-       content and can never drift from what the page actually holds. */
+    /*
+     * Discover the strip's pictures, so the mount tally counts real content and
+     * cannot drift from what the page holds.
+     *
+     * ONLY the eager ones. `img.src` is populated even on a lazy image, so
+     * watching every plate made this loop construct a `new Image()` for all 17
+     * sources and download the lot — which locked scrolling behind 3.6MB and
+     * silently cancelled the lazy loading in A13. Nineteen of the 24 plates sit
+     * thousands of pixels off-screen; the read does not need them to begin, and
+     * the machine should not claim it is mounting them.
+     *
+     * Still honest: every counted decode is a real decode of a real image the
+     * page genuinely needs before the read can start.
+     */
     const seen = new Set<string>()
     for (const el of document.querySelectorAll<HTMLElement>('[id^="tc-item-"]')) {
         const img = el.querySelector("img")
-        const url = img?.currentSrc || img?.src || ""
+        if (!img || img.loading === "lazy") continue
+        const url = img.currentSrc || img.src || ""
         if (url) seen.add(url)
     }
     const watch = Array.from(seen)
@@ -231,6 +244,7 @@ export function initBoot(options: BootOptions): () => void {
         done = true
         cancelAnimationFrame(raf)
         window.clearTimeout(guard)
+        window.clearTimeout(failsafe)
         document.documentElement.style.overflow = prevOverflow
         caret.style.display = "none"
         // Builds the audio graph. It stays suspended until the visitor's first
@@ -303,6 +317,23 @@ export function initBoot(options: BootOptions): () => void {
     host.addEventListener("click", skip)
     window.addEventListener("keydown", skip)
 
+    /*
+     * Failsafe. The boot holds `overflow: hidden` on the document, so until it
+     * hands off NOTHING on the page can be scrolled — and if anything throws
+     * inside the typing loop, `dismiss()` never runs and the piece is bricked
+     * for that visitor with no way out but a reload.
+     *
+     * The 6s guard above only forces the live ROWS complete; it does not rescue
+     * a dead rAF loop. This does. It is deliberately longer than the longest
+     * legitimate boot so it never fires in normal use.
+     */
+    const failsafe = window.setTimeout(() => {
+        if (!done) {
+            console.warn("[boot] failsafe fired — handing off without finishing")
+            dismiss()
+        }
+    }, 9000)
+
     if (reduce) {
         // No typing: the whole log at once, held briefly so it can be read.
         decoded = total
@@ -325,6 +356,7 @@ export function initBoot(options: BootOptions): () => void {
     return () => {
         cancelAnimationFrame(raf)
         window.clearTimeout(guard)
+        window.clearTimeout(failsafe)
         host.removeEventListener("click", skip)
         window.removeEventListener("keydown", skip)
         document.documentElement.style.overflow = prevOverflow
