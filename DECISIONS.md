@@ -297,3 +297,47 @@ canvas.
 
 Verified: the faceplate bakes to the superellipse profile rather than an
 ellipse — alpha 0 at the centre, 97 at the mid-edge, 249 at the corner.
+
+---
+
+### A15. The chrome is four bus subscribers, not four widgets
+
+**2026-08-17.** `SectorReadout`, `ProgressRail`, `RecoveryLog` and `MemoryCard`
+ported into one `src/lib/chrome.ts` with markup in `MachineChrome.astro`. None
+of them reads scroll position; all four subscribe to `tc:scroll` / `tc:hover`
+and bind their type to `--tc-fg` / `--tc-fg-dim`.
+
+Positions taken from the shipped CSS rather than guessed: rail fixed top
+(44px), readout fixed bottom, log bottom-right at 104px (clearing the audio
+control that lands in step 5), card bottom-left at 152×178. All at z-index 6–7,
+under the tube at 10 — which independently confirms A14: the chrome is inside
+the machine.
+
+The rail is not decoration. Its cells are real `<button>`s that seek to a
+sector, and they are the **only keyboard navigation in the piece** — a pinned
+horizontal story without them is a trap. (Upstream #16.)
+
+Alert red survives in exactly one place, the readout's CRC field, because that
+field sits on the machine's own dock and never travels under the tint. On the
+strip it measured 1.4–1.6:1. (Upstream #35.)
+
+---
+
+### A16. The dedup thread is verified, not asserted
+
+**2026-08-17.** Sectors 08–10 claim the card holds the same frames twice —
+"both frames match earlier records, bit for bit" — and the readout has to agree
+or the copy is a claim the interface contradicts.
+
+The file record is hashed from the plate's `data-tc-file` SOURCE key rather than
+its element id, so a duplicate and its original produce the same name, size and
+block address; the sector still comes from the element id, because the same file
+read in two sectors is two reads. Deterministic, never `Math.random()` — a
+random value would change every time the same picture was hovered twice.
+
+Verified across all four duplicate pairs (01·01↔08·00, 04·01↔08·01,
+01·00↔09·00, 02·00↔09·01): identical name, size and address in every case, and
+two distinct files still differ. (Upstream #39.)
+
+Duplicate plates also carry their original's exact dimensions, so the slug's
+printed size cannot contradict the "bit for bit" claim either.

@@ -5,6 +5,37 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Added — 2026-08-17 — the machine chrome (build step 4/6)
+
+- `src/lib/chrome.ts` + `src/components/MachineChrome.astro` — four bus
+  subscribers rather than four widgets (A15):
+  - **Sector map** (fixed top, 44px): one cell per sector in read / reading /
+    unread, plus a clipped copy on top carrying the continuous fill and a 1px
+    head. Two readings on one row, because blocks alone gave no feedback for a
+    third of a screen and then jumped a twelfth (upstream #30).
+  - **File readout** (fixed bottom): name, size, label, block address and CRC,
+    derived deterministically from the plate's identity.
+  - **Recovery log** (bottom-right): a tail that appends as each sector decodes
+    and RETRACTS when scrolling back — the live buffer, not the archive.
+  - **Memory card** (bottom-left): seven CSS-3D faces, every one placed the same
+    way, spinning down and parking at end of media.
+- The rail's twelve cells are real `<button>`s with `aria-label`s inside a
+  `role="navigation"` landmark — the piece's only keyboard navigation.
+
+### Verified
+
+- Rail tracks correctly across the read: sector 00 → 04 → 08 → 11, percent
+  zero-padded, fill clip and head position continuous, parking on `eom` at 100%.
+- Log shows 6 of 13 lines as a tail, with both `[[UNREAD]]` and `[[MAXIMUM]]`
+  rendering as inverted marks.
+- Readout on sector 04's plate reports `CRC ERR` with the alert class — the one
+  surviving use of Alert red, on a dock that never travels under the tint.
+- **The dedup thread holds** (A16): all four duplicate pairs report identical
+  name, size and block address as their originals, and two distinct files still
+  differ. The copy's "bit for bit" claim is verified in the interface.
+- Full-page code payload: 15.8KB JS + 3.5KB CSS + 5.1KB HTML, all gzipped.
+
+
 ### Added — 2026-08-17 — all twelve sectors, and the tube (build step 3/6)
 
 - Sectors 02–11 as hand-authored markup (A2): 24 plates across 17 distinct NASA

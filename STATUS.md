@@ -1,9 +1,9 @@
 # Status — 2026-08-17
 
-**Steps 1–3 of 6 done.** `/` is the piece: all twelve sectors, 24 plates on 17
-distinct pictures, the WebGL read head, and the CRT tube. What remains is the
-machine chrome (readout, rail, log, memory card), then the boot sequence and
-audio, then the performance/deploy pass.
+**Steps 1–4 of 6 done.** `/` is the piece: twelve sectors, 24 plates on 17
+distinct pictures, the WebGL read head, the CRT tube and the full machine
+chrome. What remains is the boot sequence and the procedural audio, then the
+Lighthouse/deploy pass.
 
 ## Done
 
@@ -83,13 +83,21 @@ audio, then the performance/deploy pass.
 - Plates outside the opening sectors load lazily: first-load imagery drops from
   3.6MB to **65KB at 1×** (A13).
 
+### Step 4 — the machine chrome
+
+- `src/lib/chrome.ts` + `src/components/MachineChrome.astro` — sector map,
+  file readout, recovery log and the turning memory card, all subscribing to
+  the bus (A15). Positions taken from the shipped CSS, not guessed.
+- The rail's twelve cells are real `<button>`s with `aria-label`s inside a
+  `role="navigation"` landmark — the piece's only keyboard navigation.
+
 ## Payload (full page, production build)
 
 | | gz |
 |---|---|
-| HTML | 3.8 KB |
-| CSS | 2.6 KB |
-| JS (rig + effect layer + tube + wordmark + scramble) | 12.6 KB |
+| HTML | 5.1 KB |
+| CSS | 3.5 KB |
+| JS (rig, effect layer, tube, chrome, wordmark, scramble) | 15.8 KB |
 | Fonts | 45.8 KB |
 | Images, first load @1× | 65 KB |
 
@@ -99,9 +107,9 @@ belongs to step 6 — these are byte counts, not scores.
 
 ## Next
 
-Step 4 — the machine chrome: `SectorReadout` (the HUD), `ProgressRail` (the
-sector map, which is also the piece's only keyboard navigation), `RecoveryLog`
-(the accreting narrative spine) and `MemoryCard` (the CSS-3D ornament).
+Step 5 — the boot sequence (a typed terminal that is also the real preloader,
+counting font and image readiness) and `RigAudio` (fully synthesized, zero asset
+bytes: television static swelling with head velocity, decode bloops, the s04
+stutter, and a set switching off at end of media).
 
-Then step 5 (boot sequence + procedural audio) and step 6 (Lighthouse against
-the Framer baseline, then Cloudflare Pages).
+Then step 6 — Lighthouse against the Framer baseline, then Cloudflare Pages.

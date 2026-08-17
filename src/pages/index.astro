@@ -12,6 +12,7 @@ import Sector08 from "~/sectors/Sector08.astro"
 import Sector09 from "~/sectors/Sector09.astro"
 import Sector10 from "~/sectors/Sector10.astro"
 import Sector11 from "~/sectors/Sector11.astro"
+import MachineChrome from "~/components/MachineChrome.astro"
 import ScreenFX from "~/components/ScreenFX.astro"
 import "~/styles/stage.css"
 import "~/styles/sector.css"
@@ -61,8 +62,9 @@ const SECTORS = 12
         </div>
     </div>
 
-    {/* The tube sits over everything, fixed to the viewport rather than to the
-        stage — the whole page is inside the machine. */}
+    {/* Chrome first, then the tube over it: the readout, rail, log and card are
+        all inside the machine and take its vignette and scanlines. */}
+    <MachineChrome sectors={SECTORS} />
     <ScreenFX />
 </Base>
 
@@ -72,6 +74,12 @@ const SECTORS = 12
     import { initAsciiMark } from "~/lib/ascii-mark"
     import { initScramble } from "~/lib/scramble"
     import { initScreenFX } from "~/lib/screen-fx"
+    import {
+        initProgressRail,
+        initSectorReadout,
+        initRecoveryLog,
+        initMemoryCard,
+    } from "~/lib/chrome"
 
     initScrollRig()
 
@@ -98,6 +106,18 @@ const SECTORS = 12
         initAsciiMark({ host, canvas: markCanvas, text: "SECTOR READ" })
 
     initScramble()
+
+    const rail = document.getElementById("tc-rail")
+    if (rail) initProgressRail({ root: rail, sectors: 12 })
+
+    const readout = document.getElementById("tc-readout")
+    if (readout) initSectorReadout(readout)
+
+    const log = document.getElementById("tc-log")
+    if (log) initRecoveryLog(log)
+
+    const bay = document.getElementById("tc-card")
+    if (bay) initMemoryCard({ host: bay })
 
     initScreenFX({
         trail: document.getElementById("tc-fx-trail") as HTMLCanvasElement,
