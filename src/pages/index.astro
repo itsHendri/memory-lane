@@ -1,0 +1,35 @@
+---
+import Base from "~/layouts/Base.astro"
+
+/*
+ * Placeholder. This becomes the piece itself once the rig lands (build step 2)
+ * and sector 00 is realised (step 3). Deliberately left as a stub rather than
+ * scaffolded with structure we have not yet proven.
+ */
+---
+
+<Base>
+    <main class="stub">
+        <p class="t-eyebrow">Sector 00 · media mounted</p>
+        <h1 class="t-display">Memory loaded</h1>
+        <p class="t-body">
+            Rebuild in progress. The type system is live — see <a href="/specimen"
+                >/specimen</a
+            >.
+        </p>
+    </main>
+</Base>
+
+<style>
+    .stub {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 14px;
+        padding: 0 40px;
+    }
+    a {
+        color: var(--tc-fg);
+    }
+</style>
