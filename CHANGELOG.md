@@ -5,6 +5,40 @@ All notable changes to this project. Format follows
 
 ## [Unreleased]
 
+### Added — 2026-08-17 — all twelve sectors, and the tube (build step 3/6)
+
+- Sectors 02–11 as hand-authored markup (A2): 24 plates across 17 distinct NASA
+  pictures, with the dedup thread intact — duplicates in 08–10 carry their
+  original's exact dimensions and `file` key, so the readout reports one record
+  for both showings (upstream #39). Sector 04's two plates are `corrupt`.
+- `src/lib/screen-fx.ts` + `src/components/ScreenFX.astro` — the CRT tube:
+  pixel cursor trail, animated static, scanlines, broad vignette and a grunge
+  superellipse faceplate baked at 220×150 and stretched, so the browser's
+  bilinear upscale is the blur (A14).
+- `alt` prop on `Plate`, separate from `label`: the duplicate plates are
+  labelled "duplicate of 01·01" for the readout, which is right for the machine
+  and useless to a screen reader. They now carry the original's description.
+
+### Changed
+
+- Plates outside the opening sectors are `loading="lazy"`. Upstream loaded all
+  24 eagerly on the reasoning that everything lives in one pinned viewport —
+  true of the stage, not of the 16,800px strip inside it. First-load imagery
+  drops from **3.6MB to 65KB at 1×** (A13).
+
+### Verified
+
+- Structure matches the original exactly: 12 sectors, 24 plates, 17 unique
+  sources, 2 corrupt, strip 16,800px, travel 15,520px, track 10,800px.
+- The faceplate bakes to a superellipse, not an ellipse: alpha 0 at centre, 97
+  at mid-edge, 249 at the corner.
+- Sector 04 renders block-corrupted **inside** the clean band — the one place
+  the treatment is allowed to invade the read head — while every other sector's
+  centre stays an undistorted window.
+- Full-page payload: 3.8KB HTML + 2.6KB CSS + 12.6KB JS (all gz) + 45.8KB fonts
+  + 65KB first-load imagery.
+
+
 ### Added — 2026-08-17 — scroll rig (build step 2/6)
 
 - `src/lib/contrast.ts` — DOM-free luminance, contrast ratio, `pickDim`, ramp

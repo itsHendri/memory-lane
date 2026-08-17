@@ -253,3 +253,47 @@ the pixel index non-integer so every lookup returns `undefined` and the mean is
 a silent `NaN`; and `readPixels` is BOTTOM-UP, so the screen row must be
 converted (`gl_row = height - 1 - css_row`) or the test proves the opposite of
 what it claims.
+
+---
+
+### A13. Plates beyond the opening sectors load lazily
+
+**2026-08-17.** The strip is 16,800px wide and the viewport shows ~1,400px of
+it, so 19 of the 24 plates are thousands of pixels off-screen at load. Upstream
+loaded all of them eagerly, on the reasoning that "everything lives in one
+pinned viewport" — true of the STAGE, but not of the strip inside it.
+
+Plates in sectors 01–02 are `eager`; the rest are `lazy`. Measured first load
+drops from **3.6MB to 65KB at 1× (182KB at 2×)**.
+
+Safe because `EffectLayer` already re-measures and uploads on the document's
+capture-phase `load` events, so a plate that arrives late still gets its plane —
+that path existed upstream for slow networks and now carries lazy loading too.
+
+Residual risk worth a ⌘P check: a plate could enter the read head fractionally
+before its texture uploads and show untreated for a frame. Native lazy loading
+has a generous margin and the strip pans slowly, so this should not happen, but
+it is the kind of thing only real scrolling reveals.
+
+---
+
+### A14. The tube is fixed to the viewport and sits above everything
+
+**2026-08-17.** `ScreenFX` ported: pixel trail → static → scanlines → vignette →
+faceplate, in that order, at `z-index: 10`.
+
+Two things that are easy to get backwards. The trail sits UNDER the glass, so
+the falloff and scanlines fall across it — on top it floats and reads as a
+browser cursor rather than as something this machine rendered. And the whole
+stack sits ABOVE the machine chrome, not below it: the readout, rail, log and
+card are all inside the tube. Chrome floating above the glass is the one screen
+in the piece with no screen on it, which is exactly the bug the boot sequence
+had upstream (#50).
+
+Scanlines and the vignette are plain CSS, so they survive with JS disabled; only
+the noise and faceplate canvases need the script. The static-renderer branch is
+deleted (A3) — it existed solely to stop the effect fogging Framer's design
+canvas.
+
+Verified: the faceplate bakes to the superellipse profile rather than an
+ellipse — alpha 0 at the centre, 97 at the mid-edge, 249 at the corner.

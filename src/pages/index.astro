@@ -2,6 +2,17 @@
 import Base from "~/layouts/Base.astro"
 import Sector00 from "~/sectors/Sector00.astro"
 import Sector01 from "~/sectors/Sector01.astro"
+import Sector02 from "~/sectors/Sector02.astro"
+import Sector03 from "~/sectors/Sector03.astro"
+import Sector04 from "~/sectors/Sector04.astro"
+import Sector05 from "~/sectors/Sector05.astro"
+import Sector06 from "~/sectors/Sector06.astro"
+import Sector07 from "~/sectors/Sector07.astro"
+import Sector08 from "~/sectors/Sector08.astro"
+import Sector09 from "~/sectors/Sector09.astro"
+import Sector10 from "~/sectors/Sector10.astro"
+import Sector11 from "~/sectors/Sector11.astro"
+import ScreenFX from "~/components/ScreenFX.astro"
 import "~/styles/stage.css"
 import "~/styles/sector.css"
 
@@ -13,11 +24,11 @@ import "~/styles/sector.css"
  * stage, memory card included, off the top of the screen. The colophon lives on
  * sector 00 for exactly this reason. (Upstream #36.)
  *
- * Build state: sectors 00–01 realised; 02–11 still to come. `--tc-sectors`
- * drives the track's height, so it must match the number of sectors below.
+ * `--tc-sectors` drives the track's height (sectors × 100vh), so it must match
+ * the number of sectors below. Twelve sectors, 24 plates, 17 distinct pictures.
  */
 
-const SECTORS = 2
+const SECTORS = 12
 ---
 
 <Base>
@@ -26,6 +37,16 @@ const SECTORS = 2
             <div class="tc-strip" id="tc-strip">
                 <Sector00 />
                 <Sector01 />
+                <Sector02 />
+                <Sector03 />
+                <Sector04 />
+                <Sector05 />
+                <Sector06 />
+                <Sector07 />
+                <Sector08 />
+                <Sector09 />
+                <Sector10 />
+                <Sector11 />
             </div>
 
             {/*
@@ -39,6 +60,10 @@ const SECTORS = 2
                 aria-hidden="true"></canvas>
         </div>
     </div>
+
+    {/* The tube sits over everything, fixed to the viewport rather than to the
+        stage — the whole page is inside the machine. */}
+    <ScreenFX />
 </Base>
 
 <script>
@@ -46,6 +71,7 @@ const SECTORS = 2
     import { initEffectLayer } from "~/lib/effect-layer"
     import { initAsciiMark } from "~/lib/ascii-mark"
     import { initScramble } from "~/lib/scramble"
+    import { initScreenFX } from "~/lib/screen-fx"
 
     initScrollRig()
 
@@ -72,6 +98,12 @@ const SECTORS = 2
         initAsciiMark({ host, canvas: markCanvas, text: "SECTOR READ" })
 
     initScramble()
+
+    initScreenFX({
+        trail: document.getElementById("tc-fx-trail") as HTMLCanvasElement,
+        noise: document.getElementById("tc-fx-static") as HTMLCanvasElement,
+        edge: document.getElementById("tc-fx-edge") as HTMLCanvasElement,
+    })
 </script>
 
 <style>

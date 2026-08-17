@@ -23,6 +23,16 @@ interface Props {
     src: ImageMetadata
     /** The machine's own observation. Fills the readout's widest field. */
     label: string
+    /**
+     * Alt text, when it must differ from the label.
+     *
+     * The duplicate plates in sectors 08–10 are labelled "duplicate of 01·01",
+     * which is the right thing for the readout — it is the machine noticing the
+     * card holds the same frame twice — and useless to a screen reader, which
+     * gets no description of the picture at all. Those plates pass the
+     * original's description here.
+     */
+    alt?: string
     fmt?: string
     /** Source key, shared by duplicates. */
     file: string
@@ -35,12 +45,23 @@ interface Props {
     /** Sector 04 only: stays dithered inside the clean band and never hands its
      *  picture back on hover. */
     corrupt?: boolean
+    /**
+     * Load immediately rather than lazily.
+     *
+     * Only the first sectors are on screen at load; the rest of the strip sits
+     * thousands of pixels to the right and native lazy loading defers it, which
+     * is most of the difference between a 3.8MB first load and a small one.
+     * `EffectLayer` already re-measures and uploads on the document's `load`
+     * events, so a late arrival still gets its plane.
+     */
+    eager?: boolean
 }
 
 const {
     id,
     src,
     label,
+    alt,
     fmt = "RAW",
     file,
     x,
@@ -49,6 +70,7 @@ const {
     h,
     rotate,
     corrupt = false,
+    eager = false,
 } = Astro.props
 
 const [code, n] = id.split("-")
@@ -67,11 +89,11 @@ const [code, n] = id.split("-")
 >
     <Image
         src={src}
-        alt={label}
+        alt={alt ?? label}
         widths={[w, w * 2]}
         sizes={`${w}px`}
         format="avif"
-        loading="eager"
+        loading={eager ? "eager" : "lazy"}
         decoding="async"
     />
     <div class="plate-slug">

@@ -1,9 +1,9 @@
 # Status — 2026-08-17
 
-**Steps 1–3 of 6 in progress: type system and scroll rig done; the read head
-works on real content.** `/` is now the piece: sectors 00–01 realised, imagery
-through `astro:assets`, and the WebGL effect layer drawing over them. Sectors
-02–11, `ScreenFX` and the four chrome components are the remainder of step 3.
+**Steps 1–3 of 6 done.** `/` is the piece: all twelve sectors, 24 plates on 17
+distinct pictures, the WebGL read head, and the CRT tube. What remains is the
+machine chrome (readout, rail, log, memory card), then the boot sequence and
+audio, then the performance/deploy pass.
 
 ## Done
 
@@ -66,7 +66,7 @@ through `astro:assets`, and the WebGL effect layer drawing over them. Sectors
   rAF does not run in the agent tab; only injected static states were measured.
 - Reduced-motion and the horizontal-wheel gesture are ported but unexercised.
 
-### Step 3 (partial) — the read head on real content
+### Step 3 — content, the read head, and the tube
 
 - `src/lib/effect-layer.ts` — the WebGL port. Two-pass: sharp planes into an
   offscreen buffer, then the spherical lens + Bayer dither through the edge
@@ -76,11 +76,32 @@ through `astro:assets`, and the WebGL effect layer drawing over them. Sectors
 - `src/styles/sector.css`, `src/components/Plate.astro` (A10),
   `src/sectors/Sector00.astro` (title card + colophon),
   `src/sectors/Sector01.astro` (first two plates).
-- All 17 NASA plates imported as repo assets; AVIF via `astro:assets`
-  (pcb 283kB → 28kB, rover 503kB → 72kB).
+- All twelve sectors as hand-authored markup (A2), 24 plates on 17 distinct
+  NASA pictures, AVIF via `astro:assets` (pcb 283kB → 28kB, rover 503kB → 72kB).
+- `src/lib/screen-fx.ts` + `src/components/ScreenFX.astro` — the tube: pixel
+  trail, static, scanlines, vignette, grunge faceplate (A14).
+- Plates outside the opening sectors load lazily: first-load imagery drops from
+  3.6MB to **65KB at 1×** (A13).
+
+## Payload (full page, production build)
+
+| | gz |
+|---|---|
+| HTML | 3.8 KB |
+| CSS | 2.6 KB |
+| JS (rig + effect layer + tube + wordmark + scramble) | 12.6 KB |
+| Fonts | 45.8 KB |
+| Images, first load @1× | 65 KB |
+
+The Framer original ships **~295KB gz of JS alone**, plus JPG-only imagery with
+no lazy loading and seven unused Inter files. A real Lighthouse comparison still
+belongs to step 6 — these are byte counts, not scores.
 
 ## Next
 
-Finish step 3: sectors 02–11, then `ScreenFX` (the CRT tube) and the four chrome
-components — `SectorReadout`, `ProgressRail`, `RecoveryLog`, `MemoryCard`. Then
-step 4 (boot + audio) and step 5 (perf/a11y/deploy).
+Step 4 — the machine chrome: `SectorReadout` (the HUD), `ProgressRail` (the
+sector map, which is also the piece's only keyboard navigation), `RecoveryLog`
+(the accreting narrative spine) and `MemoryCard` (the CSS-3D ornament).
+
+Then step 5 (boot sequence + procedural audio) and step 6 (Lighthouse against
+the Framer baseline, then Cloudflare Pages).
