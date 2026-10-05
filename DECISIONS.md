@@ -515,3 +515,32 @@ Also added: a 9s failsafe that dismisses the boot unconditionally. The 6s guard
 only forces the live rows complete; it does not rescue a dead rAF loop, and with
 scroll locked behind the boot a throw anywhere in the typing loop bricks the
 piece for that visitor with no way out but a reload.
+
+### A23. GitHub Pages is a preview host, and the subpath is the whole cost
+
+**2026-10-05.** The Cloudflare Pages deploy in STATUS.md step 6 was blocked on a
+login that never happened, so the piece had been finished and measured for seven
+weeks without ever being reachable. GitHub Pages needs no account that does not
+already exist: the repo is there and `gh` is authenticated.
+
+A project site is served from `/<repo>/`, so `base: "/memory-lane"` is set and
+every URL the build emits carries it. The port turned out to be almost immune to
+this — `astro:assets` rebases everything it processes, and Vite rebases `url()`
+in CSS, which was **verified in the build output rather than assumed**: the two
+`@font-face` rules in `type.css` still read `/fonts/...` in source and come out
+as `/memory-lane/fonts/...` in `dist`. Only `public/` references reached by hand
+needed changing, and there were three — the favicon and the two font preloads in
+`Base.astro`, now built from `import.meta.env.BASE_URL`. Had they been missed,
+the fonts would have 404'd and the piece would have rendered in system faces,
+which is the kind of failure that looks like a styling opinion rather than a
+broken path.
+
+**What Pages costs us.** `public/_headers` is a Cloudflare file and GitHub Pages
+ignores it. The year-long `immutable` cache on the two unhashed font files
+therefore does not apply, and Pages offers no way to set it. The file stays
+because Cloudflare is still the intended final home and deleting it would break
+that path; it is simply inert here. This is the reason to treat Pages as a
+preview and not a destination.
+
+**Repo made public.** Pages on a private repo needs a paid plan, so the source —
+including this file and the upstream decision trail — is now readable by anyone.
