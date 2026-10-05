@@ -1,4 +1,6 @@
 ---
+import archivoUrl from "~/assets/fonts/archivo-700-latin.woff2"
+import monoUrl from "~/assets/fonts/jetbrains-mono-var-latin.woff2"
 import "~/styles/tokens.css"
 import "~/styles/type.css"
 import "~/styles/base.css"
@@ -26,8 +28,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
 /*
  * Files in public/ are served verbatim under the deploy base, and nothing
  * rewrites them for us — astro:assets only rebases what it processes. On a
- * GitHub Pages project site the base is /memory-lane, so a bare "/fonts/..."
- * would 404 and the page would silently fall back to system faces.
+ * GitHub Pages project site the base is /memory-lane, so a bare "/favicon.svg"
+ * would 404.
+ *
+ * The fonts are NOT in public/ for this reason. A bare "/fonts/..." in
+ * type.css worked in the build (Vite rebases `url()` there) and 404'd in dev
+ * (it does not), so dev fetched every face twice and warned that the preload
+ * went unused. Importing them makes one URL that is correct in both, and the
+ * build content-hashes them — which retires the hand-maintained promise in
+ * public/_headers that their filenames would never be reused.
  */
 const base = import.meta.env.BASE_URL.replace(/\/$/, "")
 ---
@@ -59,14 +68,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "")
         */}
         <link
             rel="preload"
-            href={`${base}/fonts/archivo-700-latin.woff2`}
+            href={archivoUrl}
             as="font"
             type="font/woff2"
             crossorigin
         />
         <link
             rel="preload"
-            href={`${base}/fonts/jetbrains-mono-var-latin.woff2`}
+            href={monoUrl}
             as="font"
             type="font/woff2"
             crossorigin
