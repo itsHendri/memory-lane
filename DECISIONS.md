@@ -544,3 +544,57 @@ preview and not a destination.
 
 **Repo made public.** Pages on a private repo needs a paid plan, so the source —
 including this file and the upstream decision trail — is now readable by anyone.
+
+### A24. The vertical read gets its own read head, and `nowrap` was the whole overflow
+
+**2026-10-05, found by Hendri on a phone.** Reported as three things — the page
+drifting sideways, headlines not wrapping, images missing. The first two were
+one bug and the third was independent.
+
+**`text-wrap: nowrap` on `.t-display`.** #27 wants the headline to run off the
+edge: a contained headline reads as a slide, a cut one reads as a surface
+larger than the window. That is a claim about a window onto something wider,
+and below the breakpoint there is no such window — the strip does not pan. The
+declaration survived into a context where its premise does not hold, and the
+result was 49px of document overflow ("Duplicate blocks" paints 405px into a
+335px column). Wrapping below 810 is the only reading of #27 that survives.
+Leading goes 0.86 → 0.95 at the same time, because 0.86 is set for one line.
+
+`body { overflow-x: hidden }` had been hiding this. It is still correct for the
+panning range — the transformed strip exposes a scrollbar without it — but iOS
+pans a clipped body anyway, so all it did was turn a measurable overflow into a
+vague drift. Now scoped to `min-width: 811px`.
+
+**The effect layer was hiding pictures it could not draw.** `setTwinHidden`
+puts each plate's `<img>` at `opacity: 0` so its WebGL plane can stand in for
+it. The canvas is `display: none` below the breakpoint (#9) but
+`initEffectLayer` was called unconditionally, so the stand-in never existed:
+5/5 eager plates fetched, decoded and invisible. The layer's life is now bound
+to the same media query as its canvas, in `index.astro`, next to the vertical
+read's own binding so the two can be seen not to overlap.
+
+**The new part.** The desktop model — clean band at the centre, dither toward
+the edges — is rebuilt for the vertical read in three mask layers: a dot grid
+that is CONTENT-anchored (#4 restated: the grid belongs to the picture, the
+ramp belongs to the screen), a fringe intersected with it so edges break into
+dots rather than fading, and a hard core added on top so the band being read is
+genuinely clean rather than 55% covered. A `ViewTimeline` walks the ramps, so
+the browser drives it from scroll position and there is no per-frame loop.
+Measured: a plate at centre offset 0.14 reads 41.3%, putting the clean band
+within ~2% of the screen centre. The rest position IS the clean band, so with
+no timeline, no JS or reduced motion the picture is simply readable.
+
+**Why the timeline is attached from JS.** `animation-timeline: view()` measured
+INACTIVE — `currentTime` null on every plate, and on a bare opacity probe too —
+while `new ViewTimeline({subject})` on the same element reported 17.54%. One of
+the two is a harness artifact and one is real, and there was no way to tell
+from here; the constructor is the one that could be verified, so it is the one
+that ships.
+
+**Verification note.** Two separate conclusions in this session were wrong
+before they were right, both from the same cause: the agent pane reports
+`document.hidden`, so rAF stops. The effect canvas sits at its mount size of
+300×150 and reads as a dead desktop layer until a frame is requested, at which
+point it resizes to 2048×1536. A probe that treats a `0%` animation progress as
+falsy reports a working animation as broken. Measure the thing, then check the
+instrument.
