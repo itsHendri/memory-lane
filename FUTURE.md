@@ -5,8 +5,8 @@
 Read `STATUS.md`, then `CLAUDE.md`'s invariant list. The build order is six
 steps; **step 1 (repo + type system) is done and verified**.
 
-2. **The rig** — port `~/Framer/timeline-carousel/component/StripPan.tsx` as a
-   framework-free `src/lib/scroll-rig.ts`. Strip the three Framer imports
+2. **The rig** — port upstream's `StripPan` as a framework-free
+   `src/lib/scroll-rig.ts`. Strip its three framework imports
    (`addPropertyControls`, `ControlType`, `useIsStaticRenderer`) and the
    `--token-<uuid>` writes; keep the `tc:scroll` bus contract exactly, since
    every other component subscribes to it. Proof: numbered blocks panning, plus
@@ -15,15 +15,15 @@ steps; **step 1 (repo + type system) is done and verified**.
 3. **Sector 00, fully realised** — markup, images through `astro:assets`,
    `EffectLayer`, `ScreenFX`, and the chrome on screen there (readout, rail,
    log, memory card, ASCII mark). This proves the whole system once.
-4. **Sectors 01–11** — content per `~/Framer/timeline-carousel/story/beats.md`
-   v2 (the canonical copy, log lines and per-sector plate lists).
+4. **Sectors 01–11** — content per upstream `story/beats.md` v2 (the canonical
+   copy, log lines and per-sector plate lists).
 5. **Boot + audio** — global, not per-sector.
-6. **Perf / a11y / deploy** — Lighthouse against the Framer baseline, then
+6. **Perf / a11y / deploy** — Lighthouse against the original baseline, then
    Cloudflare Pages on the real domain.
 
 ## The Lighthouse target
 
-The Framer original ships **~295KB gz of JS** (react 47 + framer runtime 124 +
+The original ships **~295KB gz of JS** (react 47 + builder runtime 124 +
 shared-lib 68 + motion 51) for code that is mostly vanilla DOM and canvas, plus
 JPG-only images with no AVIF/WebP, plus seven unused Inter files, plus unset
 metadata. Beating it is not supposed to be close — record the actual numbers
@@ -33,11 +33,11 @@ both ways when step 6 lands, rather than asserting a win.
 
 - **Delete the duplicate image fetch.** `EffectLayer` loads its own
   `crossOrigin="anonymous"` copy of every picture *in addition to* the DOM one,
-  because Framer's tags set no `crossorigin` and would taint the WebGL context
+  because its tags set no `crossorigin` and would taint the WebGL context
   (upstream #13). Self-hosted images are same-origin, so this goes away — 16
   duplicate fetches.
 - **Delete `ScreenFX`'s static-renderer branch.** It exists only to stop fogging
-  the Framer canvas (upstream #51). There is no canvas.
+  the design canvas (upstream #51). There is no canvas.
 - **Delete the `<img>`-or-CSS-background dual discovery** in `EffectLayer`
   (upstream #13) — we control the markup, so it is always `<img>`.
 - **Delete the enum-title matching** (`/screen/i.test(...)`, upstream #12) and
@@ -64,7 +64,7 @@ both ways when step 6 lands, rather than asserting a win.
 
 - **Title**: *SECTOR READ* vs *Return to Sender*. Building with SECTOR READ.
 - **Copy sign-off** on upstream `story/beats.md` v2 — never signed off.
-- Upstream's Tablet/Phone breakpoints were **never seen rendered** (Framer's
+- Upstream's Tablet/Phone breakpoints were **never seen rendered** (its
   screenshot API renders the primary breakpoint for replicas). The rebuild makes
   this trivially checkable, so the vertical fallback should be genuinely
   reviewed rather than assumed.

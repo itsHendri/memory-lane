@@ -27,7 +27,7 @@ controls noted below.
 - `src/lib/contrast.ts` — DOM-free luminance / contrast / `pickDim` / ramp
   sampling, extracted so it can be swept in Node (A7).
 - `src/lib/scroll-rig.ts` — the ported engine. Framework-free, ~2.7KB gz
-  compiled. Framer's three imports and all `--token-<uuid>` writes are gone;
+  compiled. The original's three imports and all `--token-<uuid>` writes are gone;
   the `tc:scroll` / `tc:hover` bus contract is preserved exactly, and typed.
 - `src/styles/stage.css` — track / stage / strip / sector layout, including the
   vertical fallback below 810.
@@ -106,9 +106,9 @@ controls noted below.
 
 Measured with Lighthouse 12, headless Chrome, default mobile throttling.
 The rebuild was run against the production build served by `astro preview`;
-Framer against the live site.
+the original against its live site.
 
-| | rebuild | Framer | |
+| | rebuild | original | |
 |---|---|---|---|
 | **Performance** | **94** | 58 | +36 |
 | **Accessibility** | **100** | 95 | +5 |
@@ -136,7 +136,7 @@ but the multiples will.
 | Fonts | 45.8 KB |
 | Images, first load @1× | 65 KB |
 
-The Framer original ships **~295KB gz of JS alone**, plus JPG-only imagery with
+The original ships **~295KB gz of JS alone**, plus JPG-only imagery with
 no lazy loading and seven unused Inter files. A real Lighthouse comparison still
 belongs to step 6 — these are byte counts, not scores.
 

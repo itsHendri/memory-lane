@@ -4,10 +4,10 @@
  * Two faces, and the split is the fiction: Archivo is the ARCHIVE (what was
  * recovered — headlines, printed large, bleeding past the sector edge), and
  * JetBrains Mono is the MACHINE (everything the rig itself says). Nothing
- * else is allowed in. Inter, which the Framer build loaded as a fallback and
- * never used, is deliberately gone.
+ * else is allowed in. Inter, which the original loaded as a fallback and never
+ * used, is deliberately gone.
  *
- * Tracking is expressed in `em`, not `px`. The Framer original hardcoded three
+ * Tracking is expressed in `em`, not `px`. The original hardcoded three
  * px values per breakpoint (-5.9 / -3.8 / -2.1 at 132 / 84 / 46px); those are
  * the same ratio to within half a percent, so one em value replaces all three
  * and the display size becomes the only thing a breakpoint changes.

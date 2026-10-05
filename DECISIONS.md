@@ -4,8 +4,8 @@ Numbered and append-only. Supersede an entry with a new one; don't rewrite
 history. Rebuild decisions are `A1, A2, …` so they never collide with the
 upstream numbering they cite.
 
-Upstream is `~/Framer/timeline-carousel/DECISIONS.md` (#1–#52). Anything there
-still applies unless an entry here supersedes it.
+The upstream decisions are numbered #1–#52; anything they settle still applies
+unless an entry here supersedes it.
 
 ---
 
@@ -34,7 +34,7 @@ them. Each cost real debugging upstream.
 
 **2026-08-17.** The piece is one page of hand-authored content by a single
 author. Astro is chosen over a Vite+React SPA because static HTML on first paint
-is what the Framer original already achieves and an SPA would need a prerender
+is what the original already achieves and an SPA would need a prerender
 step bolted on to match it; and over a no-framework Vite build because the image
 pipeline and page shell are the parts that compound across the next nine
 projects.
@@ -48,11 +48,11 @@ than in a component tree.
 ### A2. Content is Astro markup, one file per sector
 
 **2026-08-17, Hendri's call.** Upstream's rule was *"content is never in code —
-every scene is a plain Framer node so Hendri can move a plate by hand"*, and
+every scene is a plain node so Hendri can move a plate by hand"*, and
 `FUTURE.md` explicitly cut *"reusable design components wrapping the artifacts —
 they would put an indirection between Hendri and the content"*.
 
-That rule's justification was Framer's canvas, which the rebuild deletes. The
+That rule's justification was a design canvas, which the rebuild deletes. The
 underlying want — move a plate, retype a line, no ceremony — survives, and plain
 HTML per sector serves it better than a data schema would: an art-directed
 collage of absolutely-positioned plates has little in common from sector to
@@ -74,11 +74,11 @@ anything inverted binds to `--tc-field` (upstream #34).
 
 The derived tokens carry **static fallbacks equal to the ramp at progress 0**,
 so the page is correct and legible before the rig's first frame and stays
-correct if JS never runs. Upstream could not do this — in Framer the same values
-were runtime-only overrides, which is exactly why the Framer canvas showed the
+correct if JS never runs. Upstream could not do this — the same values were
+runtime-only overrides there, which is exactly why its design canvas showed the
 piece as flat and "dull" (upstream #51). That whole class of problem does not
 exist here, and `ScreenFX`'s static-renderer branch, which existed only to stop
-fogging the Framer canvas, should be deleted during the port.
+fogging that canvas, should be deleted during the port.
 
 Brand Forge's conventions are borrowed (header discipline; a value appears once;
 semantic names alias primitives) but not its scaffolding — this piece has ~11
@@ -98,7 +98,7 @@ static face as the whole spectrum and synthesize the rest.
 
 Display type only ever uses 700, so the static instance is both correct and
 smaller (14KB). Mono needs 400/500/700, so it takes the variable file (31KB) and
-a real range. 48KB for both, against the Framer build's Archivo + JetBrains Mono
+a real range. 48KB for both, against the original's Archivo + JetBrains Mono
 + **seven Inter files that were never used**.
 
 Verified by ink coverage rather than by width — JetBrains Mono is monospaced, so
@@ -183,8 +183,8 @@ writing no transform.
 ### A9. The stage takes its colour from CSS, not from a per-frame write
 
 **2026-08-17.** Upstream wrote `stage.style.backgroundColor` imperatively every
-frame *in addition to* setting `--tc-bg`, because in Framer the stage's fill was
-authored on the node and a variable could never reach it.
+frame *in addition to* setting `--tc-bg`, because the stage's fill was authored
+on the node and a variable could never reach it.
 
 The stage now declares `background: var(--tc-bg)` in `stage.css` and the
 imperative write is deleted — one less style mutation per frame, and the colour
@@ -218,7 +218,7 @@ match earlier records, bit for bit" is a claim the readout contradicts.
 **2026-08-17.** Upstream's `EffectLayer` always loaded its own copy of every
 picture with `crossOrigin="anonymous"`, because sampling the page's `<img>`
 taints the WebGL context whenever that element was fetched without a
-crossorigin attribute — and Framer's tags do not set one. The cost was that
+crossorigin attribute — and upstream's tags did not set one. The cost was that
 **every picture on the strip was downloaded twice**.
 
 Our plates are same-origin repo assets, so the element itself is a legal texture
@@ -292,8 +292,8 @@ had upstream (#50).
 
 Scanlines and the vignette are plain CSS, so they survive with JS disabled; only
 the noise and faceplate canvases need the script. The static-renderer branch is
-deleted (A3) — it existed solely to stop the effect fogging Framer's design
-canvas.
+deleted (A3) — it existed solely to stop the effect fogging the original's
+design canvas.
 
 Verified: the faceplate bakes to the superellipse profile rather than an
 ellipse — alpha 0 at the centre, 97 at the mid-edge, 249 at the corner.
@@ -426,9 +426,9 @@ persists to localStorage, ramps master to 0, and dims to 0.62 rather than
 
 ### A20. The heavy layers initialise during the boot, not on the critical path
 
-**2026-08-17.** The first Lighthouse run scored **78** against Framer's 58 — a
-win on every paint metric and a bad loss on one: **Total Blocking Time 759ms
-against Framer's 41ms**, from a single 734ms long task.
+**2026-08-17.** The first Lighthouse run scored **78** against the original's 58
+— a win on every paint metric and a bad loss on one: **Total Blocking Time 759ms
+against its 41ms**, from a single 734ms long task.
 
 The cause was not any one expensive routine. Measured individually, the
 faceplate bake is 5ms, the static paint 1ms, the ASCII build 1.5ms and a full

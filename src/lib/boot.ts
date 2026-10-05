@@ -17,8 +17,6 @@
  * It also carries the audio gesture. With no BEGIN READ button, `tc:begin`
  * fires at handoff to build the graph (suspended, which is legal and silent);
  * the visitor's first scroll resumes it. (Upstream #45.)
- *
- * Ported from ~/Framer/timeline-carousel/component/BootSequence.tsx.
  */
 
 import { FLIP, hexToRgb, luminance, pickDim, rgbToCss } from "./contrast"

@@ -38,7 +38,7 @@ All notable changes to this project. Format follows
 | Total Blocking Time | 759 ms | **42 ms** |
 | Best practices | 93 | 96 |
 
-**Against the Framer original**: performance **94 vs 58**, accessibility
+**Against the original**: performance **94 vs 58**, accessibility
 **100 vs 95**, SEO level at 100, best practices 96 vs 100 (the `font-size` audit,
 a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
 3.9×, blocking time level.
@@ -154,7 +154,7 @@ a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
   sampling and the tint derivation. Extracted from the rig so the colour system
   can be swept and measured in Node rather than only by loading a page. (A7.)
 - `src/lib/scroll-rig.ts` — `StripPan` ported to a framework-free module.
-  React and Framer's three imports removed; all `--token-<uuid>` writes replaced
+  React and the original's three imports removed; all `--token-<uuid>` writes replaced
   by semantic `--tc-*` properties; the `tc:scroll` / `tc:hover` bus contract
   preserved exactly and now typed via `WindowEventMap`. Compiles to **2.7KB gz**.
 - `src/styles/stage.css` — track / stage / strip / sector layout and the
@@ -176,7 +176,7 @@ a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
 
 - The stage's background comes from `background: var(--tc-bg)` in CSS instead of
   an imperative per-frame `style.backgroundColor` write. Upstream needed the
-  write because Framer authored the fill on the node; here the variable is the
+  write because the fill was authored on the node; here the variable is the
   mechanism. One fewer style mutation per frame, one writer. (A9.)
 - `pickDim` walks integer steps (0.10…0.80) rather than accumulating `+= 0.05`
   in floating point, which drifts and can drop the final step.
@@ -214,11 +214,11 @@ a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
 - `src/styles/type.css` — Archivo 700 (static instance) + JetBrains Mono
   (variable, 400–700), self-hosted from Google's `latin` subset, **48KB total**.
   Five presets: display / eyebrow / label / body / value, plus inverted.
-  Inter — seven files the Framer build loaded and never used — dropped. (A4, A6.)
+  Inter — seven files the original loaded and never used — dropped. (A4, A6.)
 - `src/styles/base.css` — small reset, focus-visible ring, reduced-motion guard.
 - `src/layouts/Base.astro` — real document metadata (title, description,
-  canonical, OG, Twitter, theme-color) and font preloads. The Framer original
-  ships `My Framer Site` / `Made with Framer`.
+  canonical, OG, Twitter, theme-color) and font preloads. The original ships
+  its builder's generic placeholder title and description.
 - `/specimen` — permanent dev surface proving font loading, the variable weight
   axis, and that every preset binds to the derived colour tokens.
 - Project dossier: `CLAUDE.md`, `README.md`, `STATUS.md`, `DECISIONS.md`,
@@ -232,7 +232,7 @@ a deliberate trade — A21). FCP 5.0× faster, Speed Index 6.0×, TTI 4.0×, LCP
   132px against the original's −5.9px. (A5.)
 - Content architecture: hand-authored Astro markup per sector, superseding the
   plan's typed `sectors.ts` — upstream explicitly rejected that indirection, and
-  the reason it was allowed in Framer (canvas hand-editing) does not survive the
+  the reason it was allowed upstream (canvas hand-editing) does not survive the
   port. (A2.)
 
 ### Verified

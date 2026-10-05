@@ -14,10 +14,9 @@
  * All decoration, so the whole stack is aria-hidden and the moving parts stop
  * under reduced motion (the edge stays — it is a static image, not motion).
  *
- * Ported from ~/Framer/timeline-carousel/component/ScreenFX.tsx. The
- * static-renderer branch is DELETED: it existed only so the effect would not
- * fog Framer's design canvas, where the tint override never ran. There is no
- * canvas here. (Upstream #51, DECISIONS A3.)
+ * The static-renderer branch upstream carried is DELETED: it existed only to
+ * keep the effect off a design canvas, where the tint override never ran.
+ * There is no such canvas here. (Upstream #51, DECISIONS A3.)
  */
 
 export interface ScreenFXOptions {
@@ -295,11 +294,11 @@ export function initScreenFX(options: ScreenFXOptions): () => void {
                  * this module knowing anything about the page.
                  *
                  * An earlier version used `mix-blend-mode: difference` to get
-                 * the same effect for free. It did not survive contact with
-                 * Framer: the instance wrapper carried a z-index, which opens a
-                 * stacking context, and a blend mode only sees the backdrop
-                 * inside its own context — so the trail was blending against
-                 * nothing. (Upstream #23.)
+                 * the same effect for free. It did not survive upstream: a
+                 * wrapper carried a z-index, which opens a stacking context,
+                 * and a blend mode only sees the backdrop inside its own
+                 * context — so the trail was blending against nothing.
+                 * (Upstream #23.)
                  */
                 const fg =
                     root.style.getPropertyValue("--tc-fg").trim() ||

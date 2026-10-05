@@ -20,8 +20,8 @@
  * warp and the treatment. Text, stamps and slugs are never drawn here — they
  * stay real DOM, so type stays legible and selectable.
  *
- * Ported from ~/Framer/timeline-carousel/component/EffectLayer.tsx. What the
- * port changes, and why, is marked PORT: at each site.
+ * What this rebuild changes against upstream, and why, is marked PORT: at each
+ * site.
  */
 
 /** Glyph ramp, lightest → darkest. Space first so paper reads as empty. */
@@ -509,7 +509,7 @@ export function initEffectLayer(options: EffectLayerOptions): () => void {
 
     /*
      * PORT: upstream collected both <img> elements AND any element with a CSS
-     * background-image, because Framer rendered a picture fill either way and
+     * background-image, because a picture fill could arrive either way and
      * which one you got was not worth betting a build on. We author the markup,
      * so a plate is always an <img> — the background branch, and the
      * kind-aware twin-hiding it forced, are deleted.
@@ -541,8 +541,8 @@ export function initEffectLayer(options: EffectLayerOptions): () => void {
                 hovered: false,
                 corrupt: false,
             }
-            // PORT: upstream needed a second spelling because Framer's DSL has
-            // no data-* attributes, so the flag rode in the elementId
+            // PORT: upstream needed a second spelling because it had no
+            // data-* attributes available, so the flag rode in the elementId
             // (`tc-item-04-0-corrupt`). We author attributes; one spelling.
             plane.corrupt = !!el.closest("[data-tc-corrupt]")
             const geo = locate(el, s)
@@ -561,8 +561,8 @@ export function initEffectLayer(options: EffectLayerOptions): () => void {
      * PORT — the big one. Upstream always fetched its OWN copy of every picture
      * with `crossOrigin="anonymous"`, because sampling the page's <img> taints
      * the context whenever that element was fetched without a crossorigin
-     * attribute, and Framer's tags do not set one. That meant every picture on
-     * the strip was downloaded TWICE.
+     * attribute, and upstream's tags did not set one. That meant every picture
+     * on the strip was downloaded TWICE.
      *
      * Our images are same-origin repo assets, so the page's own element is a
      * legal texture source and the second fetch is deleted outright — 16
@@ -685,9 +685,9 @@ export function initEffectLayer(options: EffectLayerOptions): () => void {
         g.uniform1f(u(postProg, "uCell"), Math.max(2, cell) * dpr)
         g.uniform1f(u(postProg, "uStrength"), strength)
         g.uniform1f(u(postProg, "uGrain"), grain)
-        // PORT: upstream matched this with /screen/i.test(...) because Framer
-        // handed an enum back as its option TITLE ("Pinned to screen") rather
-        // than its value, so equality silently did nothing. Plain union now.
+        // PORT: upstream matched this with /screen/i.test(...) because the
+        // enum came back as its option TITLE ("Pinned to screen") rather than
+        // its value, so equality silently did nothing. Plain union now.
         g.uniform1f(u(postProg, "uAnchor"), anchor === "screen" ? 0 : 1)
         g.uniform1f(u(postProg, "uDissolve"), dissolve)
         g.uniform1i(u(postProg, "uMode"), MODE_INDEX[mode] ?? 0)

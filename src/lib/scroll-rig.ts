@@ -25,9 +25,8 @@
  * event fires in the SAME frame the transform is written, so the effect layer
  * can render its planes into the identical paint instead of trailing by one.
  *
- * Ported from ~/Framer/timeline-carousel/component/StripPan.tsx. Framer's
- * `--token-<uuid>` writes are gone (we own semantic token names); everything
- * else is behaviour-identical on purpose.
+ * Upstream's `--token-<uuid>` writes are gone (we own semantic token names);
+ * everything else is behaviour-identical on purpose.
  */
 
 import { RAMP, tint, type RGB } from "./contrast"
@@ -137,8 +136,8 @@ export function initScrollRig(options: ScrollRigOptions = {}): () => void {
      */
     function measure() {
         // Measured against the STAGE — the box that actually clips the strip —
-        // not the window. Upstream #8: inside Framer the stage sat in a centred
-        // breakpoint narrower than the viewport, and measuring the window left
+        // not the window. Upstream #8: the stage sat in a centred breakpoint
+        // narrower than the viewport, and measuring the window left
         // the final sector permanently unreachable. We control the layout now,
         // but the stage remains the correct thing to measure and costs nothing.
         const stage = strip!.parentElement
@@ -178,12 +177,12 @@ export function initScrollRig(options: ScrollRigOptions = {}): () => void {
         root.style.setProperty("--tc-fg-dim", c.dim)
         // Anything inverted (a chip filled with ink) paints its text in
         // whatever the page currently IS, or it goes black-on-black the moment
-        // the ramp lightens. Upstream #34 — where this had to be a Framer token
+        // the ramp lightens. Upstream #34 — where this had to be a token
         // override; here it is just a variable.
         root.style.setProperty("--tc-field", c.bg)
         // NOTE: upstream also wrote the stage's backgroundColor imperatively,
-        // because in Framer the stage's fill was authored and a variable would
-        // never reach it. Our stage reads `background: var(--tc-bg)` in CSS, so
+        // because the stage's fill was authored and a variable would never
+        // reach it. Our stage reads `background: var(--tc-bg)` in CSS, so
         // that write is deleted rather than ported.
         window.dispatchEvent(
             new CustomEvent<TcScrollDetail>("tc:scroll", {
@@ -379,11 +378,11 @@ export function initScrollRig(options: ScrollRigOptions = {}): () => void {
             tiltTo(el, lastPointer?.x ?? null, lastPointer?.y ?? null)
         }
         const rect = el?.getBoundingClientRect() ?? null
-        /* Artifact metadata. Upstream had to smuggle this through surfaces
-           Framer nodes could carry (aria-label, slug text, the image src),
-           because the agent DSL has no data-* attributes — and had to read a
-           CSS background-image as well as an <img>, because Framer emitted
-           either. We author the markup, so the attributes are first-class and
+        /* Artifact metadata. Upstream had to smuggle this through whatever
+           surfaces a node could carry (aria-label, slug text, the image src),
+           because it had no data-* attributes available — and had to read a
+           CSS background-image as well as an <img>, because either could be
+           emitted. We author the markup, so the attributes are first-class and
            a plate is always an <img>.
 
            `data-tc-file` still identifies the SOURCE rather than the plate, so

@@ -13,7 +13,7 @@
  * (Upstream #36.)
  *
  * Upstream additionally needed the track and every ancestor to keep
- * `overflow: visible`, because Framer clips containers by default and any
+ * `overflow: visible`, because containers were clipped by default and any
  * clipping ancestor becomes the sticky containing block, which silently stops
  * the stage pinning (upstream #14). We do not clip anything here, but that is
  * the failure mode if the stage ever stops sticking.
@@ -39,8 +39,8 @@
     background: var(--tc-bg);
     /*
      * Upstream wrote this colour imperatively onto the element every frame,
-     * because in Framer the stage's fill was authored and a CSS variable could
-     * never reach it. Here the variable is the whole mechanism.
+     * because the stage's fill was authored and a CSS variable could never
+     * reach it. Here the variable is the whole mechanism.
      */
 }
 

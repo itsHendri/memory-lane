@@ -1,7 +1,6 @@
 # memory-lane
 
-**SECTOR READ** — a scroll-to-pan narrative piece, rebuilt from Framer as owned
-code.
+**SECTOR READ** — a scroll-to-pan narrative piece, rebuilt as owned code.
 
 A recovery machine reads a memory card that never arrived. Vertical scroll
 drives a wide story strip left→right beneath a pinned viewport: the centre of
@@ -9,15 +8,13 @@ the screen is the read head where the card decodes, and toward the edges the
 imagery bends through a spherical lens and breaks down into dither — sectors not
 yet read. Twelve sectors, 24 plates, on public-domain NASA photographs.
 
-Live: https://itshendri.github.io/memory-lane/ — this port, on GitHub Pages
-Live (Framer original): https://memory-lane.framer.website/
+Live: https://itshendri.github.io/memory-lane/
 
 ## Why this repo exists
 
-The piece was designed and built in Framer (`~/Framer/timeline-carousel`, which
-remains the source of truth for behaviour and copy). This is a port to owned
+The piece was designed and built elsewhere first; this is the rebuild as owned
 code — static, self-hosted, and free of the ~295KB gz of framework runtime the
-Framer build ships for work that is mostly vanilla DOM and canvas.
+original shipped for work that is mostly vanilla DOM and canvas.
 
 It is also the first of roughly ten pieces in this vein, so the scroll rig, the
 token layering and the type system are built to be lifted into the next one.
@@ -51,13 +48,9 @@ npm run build
 |---|---|
 | `CLAUDE.md` | Auto-loaded context; the invariants that must not break |
 | `STATUS.md` | Current state, dated |
-| `DECISIONS.md` | Rationale, append-only (`A1…`), citing upstream `#N` |
+| `DECISIONS.md` | Rationale, append-only (`A1…`) |
 | `FUTURE.md` | Next-session entry point + backlog |
 | `CHANGELOG.md` | Keep-a-Changelog log |
-
-**Upstream `~/Framer/timeline-carousel/DECISIONS.md` (#1–#52) is still law.**
-Most of its entries record an expensive bug; check it before changing anything
-that looks arbitrary.
 
 ## Credits
 

@@ -329,10 +329,8 @@ export interface MemoryCardOptions {
  *
  * CSS 3D rather than a loaded model, for three independent reasons: a second
  * WebGL context competes with the strip for GPU memory and the browser's
- * context cap; Framer pinned package versions so a bare `three` import was a
- * liability (moot here, but the other two are not); and there is no CC0
- * floppy/card model in existence, so every free model drags a CC-BY attribution
- * into the project. A memory card is a flat slab with one cut corner, which is
+ * context cap; and there is no CC0 floppy/card model in existence, so every
+ * free model drags a CC-BY attribution into the project. A memory card is a flat slab with one cut corner, which is
  * exactly the shape CSS 3D does well. (Upstream #24.)
  *
  * EVERY FACE IS PLACED THE SAME WAY — centred on the box's centre, then moved

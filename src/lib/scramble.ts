@@ -10,8 +10,6 @@
  *   - it is gated on an IntersectionObserver, so off-screen sectors don't all
  *     resolve before anyone sees them;
  *   - it rewrites DOM text nodes in place rather than re-rendering.
- *
- * Ported from ~/Framer/timeline-carousel/component/Scramble.tsx.
  */
 
 const JUNK = "▚▞█▓▒░#@%&$/\\<>=+*"

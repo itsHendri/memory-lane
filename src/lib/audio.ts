@@ -8,8 +8,6 @@
  * bloop per sector boundary with random detune, a mechanical click when the
  * head takes an artifact, dropouts through sector 04, and at end of media a set
  * switching off. (Upstream #43.)
- *
- * Ported from ~/Framer/timeline-carousel/component/RigAudio.tsx.
  */
 
 const STORE_KEY = "tc-aud"

@@ -14,8 +14,6 @@
  *   - **It only runs while it is on screen.** Per-frame fillText over hundreds
  *     of cells is genuinely expensive, and this sits under a continuously
  *     repainting WebGL strip.
- *
- * Ported from ~/Framer/timeline-carousel/component/AsciiMark.tsx.
  */
 
 /** Dense glyphs only — no space, no full stop. Every cell carries ink. */

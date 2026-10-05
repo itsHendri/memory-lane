@@ -5,33 +5,31 @@ that never arrived: vertical scroll drives a wide story strip left→right under
 pinned viewport, the centre of the screen is the read head where the card
 decodes, and the edges bend through a spherical lens and break into dither.
 
-This is a **port of a finished Framer piece**, not a new build. The original is
-at `~/Framer/timeline-carousel` (live: https://memory-lane.framer.website/) and
-is the source of truth for behaviour, copy and craft.
+This is a **rebuild of a finished piece**, not a new build.
 
 **Read `STATUS.md` first, then `DECISIONS.md`.**
 
 ## The one rule
 
-**`~/Framer/timeline-carousel/DECISIONS.md` is upstream law.** It holds 52
-numbered decisions, most with measurements attached, and nearly every one
-records a bug that was expensive to find. Before changing anything that looks
-arbitrary in a ported component, grep that file — it probably is not arbitrary.
-Our own `DECISIONS.md` records only what is NEW or CHANGED in the rebuild, and
-cites upstream numbers as `(upstream #N)`.
+**Treat anything that looks arbitrary as deliberate until proved otherwise.**
+Most of it encodes a bug that was expensive to find, and the measurement that
+settled it is usually in `DECISIONS.md` — which records what is NEW or CHANGED
+in the rebuild and cites the original's numbered decisions as `(upstream #N)`.
+Those citations no longer resolve to a document in this repo; the reasoning
+that survived is quoted in place at each site.
 
 ## What the rebuild changes on purpose
 
 - **Content lives in Astro markup, one file per sector.** Upstream's "content is
-  never in code" rule existed because Framer's canvas gave free-form hand
+  never in code" rule existed because a design canvas gave free-form hand
   editing; there is no canvas now, so real HTML per sector is the closest
   equivalent. Do not introduce a `Sector` component that takes a data object —
   that is the indirection upstream explicitly rejected.
-- **Tokens are semantic names**, not Framer's `--token-<uuid>`.
-- **Images are repo assets** through `astro:assets` (AVIF/WebP + srcset), not
-  Framer's CDN, and are same-origin — which deletes upstream's duplicate
+- **Tokens are semantic names**, not the original's `--token-<uuid>`.
+- **Images are repo assets** through `astro:assets` (AVIF/WebP + srcset), not a
+  third-party CDN, and are same-origin — which deletes upstream's duplicate
   `crossOrigin` fetch per picture (upstream #13).
-- **Inter is gone.** Framer loaded it as an unused fallback.
+- **Inter is gone.** The original loaded it as an unused fallback.
 
 ## What must not break (ported invariants)
 
