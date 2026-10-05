@@ -9,6 +9,7 @@ the screen is the read head where the card decodes, and toward the edges the
 imagery bends through a spherical lens and breaks down into dither — sectors not
 yet read. Twelve sectors, 24 plates, on public-domain NASA photographs.
 
+Live: https://itshendri.github.io/memory-lane/ — this port, on GitHub Pages
 Live (Framer original): https://memory-lane.framer.website/
 
 ## Why this repo exists
@@ -31,7 +32,7 @@ token layering and the type system are built to be lifted into the next one.
 | Effects | Raw WebGL 1 (no Three.js) + 2D canvas |
 | Audio | Synthesized WebAudio, zero asset bytes |
 | Content | Hand-authored Astro markup, one file per sector |
-| Hosting | Cloudflare Pages (planned) |
+| Hosting | GitHub Pages (live, preview) · Cloudflare Pages (planned, final) |
 
 ## Running it
 
