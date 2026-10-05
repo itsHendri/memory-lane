@@ -74,6 +74,27 @@
     text-wrap: nowrap;
 }
 
+/*
+ * Below the breakpoint the strip does not pan, so there is no surface for a
+ * headline to bleed onto — #27's `nowrap` is load-bearing only while the
+ * window is a moving window onto something wider. Left on, it was the whole
+ * of the mobile horizontal scroll: "Duplicate blocks" paints 405px into a
+ * 335px column, and the document measured 424px wide against a 375px
+ * viewport. Wrapping is the only reading of #27 that survives here.
+ *
+ * `balance` rather than `normal` so a two-word title breaks evenly instead of
+ * dropping one short word onto its own line.
+ */
+@media (max-width: 810px) {
+    .t-display {
+        text-wrap: balance;
+        /* 0.86 is set for a single bleeding line; stacked, uppercase lines at
+         * that leading collide. This is the smallest value that clears the
+         * cap height at 46px. */
+        line-height: 0.95;
+    }
+}
+
 @media (min-width: 810px) {
     .t-display {
         font-size: 84px;

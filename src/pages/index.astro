@@ -85,8 +85,12 @@ const SECTORS = 12
     } from "~/lib/chrome"
     import { initBoot } from "~/lib/boot"
     import { initRigAudio } from "~/lib/audio"
+    import { initVerticalRead } from "~/lib/vertical-read"
 
     const SECTORS_N = 12
+    /* Matches --bp-phone and the rig's own `mobileMax`. Below it the strip
+     * does not pan and the WebGL layer is off. */
+    const MOBILE_MAX = 810
     const byId = (id: string) => document.getElementById(id)
 
     /*
@@ -125,13 +129,60 @@ const SECTORS = 12
         () => {
             const canvas = byId("tc-effect") as HTMLCanvasElement | null
             if (canvas) {
-                const root = getComputedStyle(document.documentElement)
-                initEffectLayer({
-                    canvas,
-                    ink: root.getPropertyValue("--tc-fg").trim() || "#FFFFFF",
-                    paper: root.getPropertyValue("--tc-bg").trim() || "#05060F",
-                })
+                /*
+                 * The layer hides each plate's <img> so its plane can stand in
+                 * for it (`setTwinHidden`). The canvas is `display: none`
+                 * below the breakpoint — see the style block — so initialising
+                 * it there left every photograph at `opacity: 0` with nothing
+                 * drawing in its place: the vertical read showed captions
+                 * around empty boxes. Bind the layer's life to the same
+                 * breakpoint the CSS uses. Teardown restores the originals,
+                 * which is what makes crossing the breakpoint safe.
+                 */
+                const wide = window.matchMedia(
+                    `(min-width: ${MOBILE_MAX + 1}px)`
+                )
+                let teardown: (() => void) | null = null
+                const sync = () => {
+                    if (wide.matches && !teardown) {
+                        const root = getComputedStyle(
+                            document.documentElement
+                        )
+                        teardown = initEffectLayer({
+                            canvas,
+                            ink:
+                                root.getPropertyValue("--tc-fg").trim() ||
+                                "#FFFFFF",
+                            paper:
+                                root.getPropertyValue("--tc-bg").trim() ||
+                                "#05060F",
+                        })
+                    } else if (!wide.matches && teardown) {
+                        teardown()
+                        teardown = null
+                    }
+                }
+                sync()
+                wide.addEventListener("change", sync)
             }
+
+            /*
+             * The vertical read's own read head — the mobile counterpart of
+             * the layer above, and bound to the same breakpoint from the same
+             * place so the two can never both be running.
+             */
+            let dropVertical: (() => void) | null = null
+            const narrow = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`)
+            const syncVertical = () => {
+                if (narrow.matches && !dropVertical)
+                    dropVertical = initVerticalRead()
+                else if (!narrow.matches && dropVertical) {
+                    dropVertical()
+                    dropVertical = null
+                }
+            }
+            syncVertical()
+            narrow.addEventListener("change", syncVertical)
 
             const host = byId("tc-asciimark")
             const markCanvas = byId(

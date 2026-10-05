@@ -444,6 +444,13 @@ const renderLine = (text: string) =>
         }
         .audio {
             bottom: 20px;
+            /*
+             * The control measured 101×26 on a phone — the only thing on the
+             * vertical read a finger has to hit, and under the 44px target.
+             * Padding rather than a height, so the bordered chip keeps its
+             * proportions and only the hit area grows.
+             */
+            padding: 14px 10px;
         }
         .log {
             position: static;

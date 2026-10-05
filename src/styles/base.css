@@ -27,11 +27,25 @@ body {
     margin: 0;
     background: transparent;
     font-family: var(--font-mono);
-    /*
-     * The strip is far wider than the viewport and is moved with a transform.
-     * Without this, some browsers still expose a horizontal scrollbar for it.
-     */
-    overflow-x: hidden;
+}
+
+/*
+ * The strip is far wider than the viewport and is moved with a transform.
+ * Without this, some browsers still expose a horizontal scrollbar for it.
+ *
+ * Scoped to the panning range deliberately. `overflow-x` on the body makes the
+ * body a scroll container, and a scroll container with no scrollable block
+ * axis of its own leaves every `view()` timeline inside it INACTIVE — which is
+ * what the vertical read's plate masks hang off. It was also hiding rather
+ * than fixing the mobile overflow: iOS pans a clipped body anyway, so the
+ * runaway headline read as a page that drifts sideways. Below the breakpoint
+ * nothing pans, so nothing needs clipping, and the real fix is that the
+ * headline now wraps (type.css).
+ */
+@media (min-width: 811px) {
+    body {
+        overflow-x: hidden;
+    }
 }
 
 h1,

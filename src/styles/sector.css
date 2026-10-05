@@ -188,6 +188,75 @@
         aspect-ratio: 3 / 2;
         margin-bottom: 38px;
     }
+
+    /*
+     * The read head, turned ninety degrees.
+     *
+     * Desktop pans a strip under a fixed centre and the WebGL layer keeps a
+     * clean band there, dithering toward both edges. There is no WebGL here
+     * (upstream #9: a phone viewport leaves no meaningful clean band between
+     * two treated edges, and a multi-thousand-pixel strip of textures is the
+     * GPU risk). So the same model is rebuilt in three mask layers, moved by a
+     * ViewTimeline — the browser drives it off scroll position, so there is no
+     * per-frame loop and nothing to keep in sync with the rig.
+     *
+     * The timeline is attached from `vertical-read.ts` rather than with
+     * `animation-timeline: view()` in CSS. Both are the same primitive, but the
+     * CSS form measured INACTIVE here — `currentTime` null on every plate, and
+     * on a plain opacity probe too, while `new ViewTimeline({subject})` on the
+     * same element reported 17.54%. Rather than ship an effect that could not
+     * be verified, the driver uses the API that measurably works.
+     *
+     * Three layers, because a single dotted ramp would lay a permanent screen
+     * door over the whole picture:
+     *
+     *   dots     a 3px grid, CONTENT-anchored — it must not swim as the plate
+     *            travels. This is upstream #4 (gpx = spx + pan) restated for
+     *            the vertical read: the grid belongs to the picture, the ramp
+     *            belongs to the screen.
+     *   fringe   the feather. Intersected with the dots, so the edges break
+     *            into a dot pattern instead of fading smoothly.
+     *   core     a hard plateau, ADDED on top, so the band actually being read
+     *            is completely clean rather than 55% covered.
+     *
+     * The mask sits on the <img>, not the .plate: the outline and corner ticks
+     * are the machine's reading of the plate and must not dissolve with the
+     * picture (see the ::before/::after note above).
+     */
+    @supports (mask-composite: intersect) {
+        .plate img {
+            mask-image: radial-gradient(
+                    circle at 50% 50%,
+                    #000 0 45%,
+                    transparent 46%
+                ),
+                linear-gradient(
+                    to bottom,
+                    transparent 0 20%,
+                    #000 42% 58%,
+                    transparent 80% 100%
+                ),
+                linear-gradient(
+                    to bottom,
+                    transparent 0 44%,
+                    #000 44% 56%,
+                    transparent 56% 100%
+                );
+            mask-size: 3px 3px, 100% 300%, 100% 300%;
+            mask-repeat: repeat, no-repeat, no-repeat;
+            mask-composite: intersect, add;
+            /*
+             * The ramps are three times the box, so the box sees one third of
+             * them at a time and the Y position walks the clean band down the
+             * plate. 50% — the band dead centre, plate fully clean — is the
+             * REST STATE on purpose: if the driver never runs (no ViewTimeline,
+             * reduced motion, JS off) the picture is simply readable rather
+             * than stuck half-dissolved. `vertical-read.ts` animates it from
+             * 0% to 100% across the plate's travel through the viewport.
+             */
+            mask-position: 0 0, 0 50%, 0 50%;
+        }
+    }
 }
 
 /* Sector padding lives here rather than in stage.css: the stage owns the
